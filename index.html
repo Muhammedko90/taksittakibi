@@ -8,7 +8,6 @@
     <!-- MANIFEST VE İKON GÜNCELLEMELERİ -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6d28d9">
-    <!-- Not: 'images/icon-192x192.png' gibi dosyaları projenize eklemelisiniz. -->
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/6d28d9/ffffff?text=MAK">
 
     <!-- STYLES -->
@@ -52,7 +51,6 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- FIREBASE KURULUMU ---
-        // Bu yapılandırmayı kendi Firebase projenizden aldığınız bilgilerle değiştirmelisiniz.
         const firebaseConfig = {
             apiKey: "AIzaSyA0ZOlfP0egAypBwBI2UR0QhoobDRVF_Ew",
             authDomain: "mak-taksit-asistani-394e8.firebaseapp.com",
@@ -68,7 +66,6 @@
             const auth = getAuth(app);
             const db = getFirestore(app);
             
-            // Global scope'ta ana fonksiyonu çağır
             window.startApp(auth, db, {
                 collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, setDoc,
                 GoogleAuthProvider, signInWithPopup, signOut,
@@ -209,6 +206,7 @@
             </div>
 
             <div id="panel-settings" class="main-panel space-y-8">
+                <!-- DÜZENLENDİ: İsteğiniz üzerine Ayarlar menüsünün sırası değiştirildi. -->
                  <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
                      <h2 class="text-xl font-bold mb-4 dark:text-white">Tema Seçenekleri</h2>
                      <div class="flex items-center gap-4">
@@ -224,16 +222,6 @@
                      </div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
-                    <h2 class="text-xl font-bold mb-4 dark:text-white">Gizlilik</h2>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <label for="privacy-mode-toggle" class="font-medium text-white">Gizlilik Modu</label>
-                            <p class="text-sm text-slate-400 mt-1">Uygulamadaki tüm finansal tutarları gizler.</p>
-                        </div>
-                        <label for="privacy-mode-toggle" class="relative inline-flex items-center cursor-pointer"><input type="checkbox" value="" id="privacy-mode-toggle" class="sr-only peer"><div class="w-11 h-6 bg-slate-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-800 peer-checked:bg-violet-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div></label>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
                     <h2 class="text-xl font-bold mb-4 dark:text-white">Kartlarınızı Yönetin</h2>
                     <form id="add-card-form" class="space-y-4">
                         <input type="text" id="card-name" placeholder="Kart Adı (Örn: Maaş Kartım)" class="w-full px-3 py-2 border border-slate-600 rounded-md bg-slate-700" required>
@@ -242,6 +230,16 @@
                         <button type="submit" class="w-full text-white py-2 px-4 rounded-md font-semibold transition-colors" style="background-color: var(--primary-color);">Kart Ekle</button>
                     </form>
                     <div id="card-list" class="mt-6 space-y-4"></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4 dark:text-white">Gizlilik</h2>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label for="privacy-mode-toggle" class="font-medium text-white">Gizlilik Modu</label>
+                            <p class="text-sm text-slate-400 mt-1">Uygulamadaki tüm finansal tutarları gizler.</p>
+                        </div>
+                        <label for="privacy-mode-toggle" class="relative inline-flex items-center cursor-pointer"><input type="checkbox" value="" id="privacy-mode-toggle" class="sr-only peer"><div class="w-11 h-6 bg-slate-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-800 peer-checked:bg-violet-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div></label>
+                    </div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
                     <h2 class="text-xl font-bold mb-4 dark:text-white">Hesap Yönetimi</h2>
@@ -279,7 +277,6 @@
     <div id="info-modal" class="modal bg-slate-800 p-6 rounded-lg shadow-xl max-w-sm w-full"></div>
 
     <script>
-    // Global scope'a startApp fonksiyonunu ekliyoruz.
     window.startApp = (auth, db, fb) => {
         const {
             collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, query, setDoc,
@@ -302,16 +299,14 @@
             let unsubscribeCards = null;
             let unsubscribePurchases = null;
             let unsubscribeSettings = null;
-            let selectedPlanMonth = null;
             let historyCurrentPage = 1;
             const HISTORY_ITEMS_PER_PAGE = 5;
             const CATEGORIES = ['Gıda', 'Fatura', 'Ulaşım', 'Giyim', 'Eğlence', 'Sağlık', 'Ev Eşyası', 'Dijital Servis', 'Diğer'];
             let categoryChartInstance = null;
             let itemToDelete = {};
             let confirmCallback = null;
-
-            // --- YENİ EKLENEN STATE: Ay seçicisinin durumunu takip eder ---
-            let monthSelectorExpanded = false;
+            // DÜZELTME: Ay seçimi artık localStorage'da saklanacak ve buradan yüklenecek.
+            let selectedPlanMonth = localStorage.getItem('selectedPlanMonth') || null;
 
             // --- DOM ELEMENTLERİ ---
             const el = {
@@ -442,13 +437,16 @@
                 if (!currentUser) return;
                 const paymentSchedule = calculatePaymentSchedule();
                 
-                if (selectedPlanMonth === null) {
+                // DÜZELTME: Saklanan ay filtresini doğrula ve geçersizse varsayılana dön.
+                const availableMonths = ['all', ...Object.keys(paymentSchedule).filter(m => paymentSchedule[m].unpaidTotal > 0)];
+                if (!selectedPlanMonth || !availableMonths.includes(selectedPlanMonth)) {
                     selectedPlanMonth = findFirstUnpaidMonth(paymentSchedule);
+                    localStorage.setItem('selectedPlanMonth', selectedPlanMonth);
                 }
 
                 populateMonthSelector(paymentSchedule, selectedPlanMonth);
                 renderSummary(paymentSchedule);
-                renderPaymentPlan(calculatePaymentSchedule(), selectedPlanMonth);
+                renderPaymentPlan(paymentSchedule, selectedPlanMonth);
                 renderHistory(paymentSchedule);
                 renderCategoryChart();
                 renderCards();
@@ -458,63 +456,42 @@
                 populateCategorySelects();
             }
 
+            // DÜZELTME: Ay seçici mantığı basitleştirildi.
             function populateMonthSelector(schedule, currentSelection) {
                 if (!el.planMonthSelector) return;
 
-                const lastSelectedValue = el.planMonthSelector.value;
                 el.planMonthSelector.innerHTML = ''; 
-
                 const allUnpaidMonths = Object.keys(schedule).filter(m => schedule[m].unpaidTotal > 0).sort();
 
-                if (!monthSelectorExpanded) {
-                    const firstUnpaidMonth = findFirstUnpaidMonth(schedule);
-                    if (firstUnpaidMonth !== 'all') {
-                        el.planMonthSelector.add(new Option(dayjs(firstUnpaidMonth).format('MMMM YYYY'), firstUnpaidMonth));
-                        if (allUnpaidMonths.length > 1) {
-                            const hintOption = new Option('Diğer ayları göster...', 'disabled_hint');
-                            hintOption.disabled = true;
-                            el.planMonthSelector.add(hintOption);
-                        }
-                    } else {
-                        el.planMonthSelector.add(new Option('Gelecek ödeme yok', 'none'));
-                    }
-                    el.planMonthSelector.value = firstUnpaidMonth;
+                el.planMonthSelector.add(new Option('Tüm Aylar', 'all'));
+                
+                allUnpaidMonths.forEach(monthKey => {
+                    el.planMonthSelector.add(new Option(dayjs(monthKey).format('MMMM YYYY'), monthKey));
+                });
+
+                if (el.planMonthSelector.querySelector(`[value="${currentSelection}"]`)) {
+                    el.planMonthSelector.value = currentSelection;
                 } else {
-                    el.planMonthSelector.add(new Option('Tüm Aylar', 'all'));
-                    allUnpaidMonths.forEach(monthKey => {
-                        el.planMonthSelector.add(new Option(dayjs(monthKey).format('MMMM YYYY'), monthKey));
-                    });
-                    const valueToRestore = currentSelection || lastSelectedValue;
-                    if (el.planMonthSelector.querySelector(`[value="${valueToRestore}"]`)) {
-                        el.planMonthSelector.value = valueToRestore;
-                    } else {
-                        el.planMonthSelector.value = findFirstUnpaidMonth(schedule);
-                    }
+                    el.planMonthSelector.value = 'all'; 
                 }
             }
-
 
             function renderCards() { if (!el.cardList) return; el.cardList.innerHTML = cards.length === 0 ? `<div class="text-center py-8"><p class="mt-1 text-sm text-slate-400">Başlamak için ilk kartınızı ekleyin!</p></div>` : ''; cards.forEach(card => { const totalSpending = purchases.filter(p => p.cardId === card.id).reduce((sum, p) => sum + parseFloat(p.totalAmount), 0); const remainingLimit = parseFloat(card.cardLimit) - totalSpending; const usagePercentage = card.cardLimit > 0 ? (totalSpending / card.cardLimit) * 100 : 0; const cardEl = document.createElement('div'); cardEl.className = 'bg-slate-700 p-4 rounded-lg border border-slate-600 transition-all duration-300'; cardEl.style.animation = 'fadeIn 0.5s'; cardEl.innerHTML = ` <div class="flex justify-between items-start"> <div> <p class="font-semibold text-lg text-white">${card.cardName}</p> <p class="text-xs text-slate-400">Kesim: Ayın ${card.statementDay}. günü</p> </div> <div class="flex items-center space-x-2"> <button data-id="${card.id}" class="edit-card-btn text-sm bg-blue-900/50 text-blue-300 font-semibold px-3 py-1 rounded-md hover:bg-blue-800/50">Düzenle</button> <button data-id="${card.id}" class="delete-card-btn text-sm bg-red-900/50 text-red-300 font-semibold px-3 py-1 rounded-md hover:bg-red-800/50">Sil</button> </div> </div> <div class="mt-3"> <div class="flex justify-between text-xs mb-1"> <span class="text-slate-400">Kullanılan: <span class="font-medium text-white">${formatCurrency(totalSpending)}</span></span> <span class="text-slate-400">Limit: <span class="font-medium text-white">${formatCurrency(card.cardLimit)}</span></span> </div> <div class="w-full bg-slate-600 rounded-full h-2.5"> <div class="h-2.5 rounded-full transition-all duration-500" style="width: ${Math.min(usagePercentage, 100)}%; background-color: ${usagePercentage > 90 ? '#ef4444' : usagePercentage > 70 ? '#f97316' : 'var(--primary-color)'};"></div> </div> <p class="text-right text-xs mt-1 text-green-400">Kalan Limit: <span class="font-bold">${formatCurrency(remainingLimit)}</span></p> </div>`; el.cardList.appendChild(cardEl); }); }
             function renderPurchasesList() { if (!el.purchaseList) return; const searchTerm = document.getElementById('search-input').value.toLowerCase(); const category = document.getElementById('filter-category').value; let filtered = purchases.filter(p => p.purchaseName.toLowerCase().includes(searchTerm) && (category ? p.category === category : true)); el.purchaseList.innerHTML = filtered.length === 0 ? '<p class="text-sm text-slate-400 text-center py-4">Filtreye uygun harcama yok.</p>' : ''; [...filtered].sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate)).forEach(p => { const card = cards.find(c => c.id === p.cardId); const purchaseEl = document.createElement('div'); purchaseEl.className = 'flex justify-between items-center bg-slate-700 p-4 rounded-lg border border-slate-600'; const recurringIcon = p.isRecurring ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-2 text-cyan-400" title="Tekrarlayan Harcama" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 12A8 8 0 1013 5.372" /></svg>` : ''; purchaseEl.innerHTML = `<div><p class="font-semibold text-white">${p.purchaseName}${recurringIcon}</p><p class="text-sm text-slate-300"><span class="font-medium" style="color:var(--primary-text-color);">${p.category || 'Diğer'}</span> - ${formatCurrency(p.totalAmount / p.installmentsCount)} x ${p.installmentsCount} Taksit</p><p class="text-xs text-slate-400">Tarih: ${dayjs(p.purchaseDate).format('DD.MM.YYYY')} | Kart: ${card ? card.cardName : 'Bilinmeyen'}</p></div><div class="flex items-center space-x-2"><button data-id="${p.id}" class="edit-purchase-btn text-sm bg-blue-900/50 text-blue-300 font-semibold px-3 py-1 rounded-md hover:bg-blue-800/50">Düzenle</button><button data-id="${p.id}" class="delete-purchase-btn text-sm bg-red-900/50 text-red-300 font-semibold px-3 py-1 rounded-md hover:bg-red-800/50">Sil</button></div>`; el.purchaseList.appendChild(purchaseEl); }); }
             function renderSubscriptions() { if (!el.subscriptionList) return; const subscriptions = purchases.filter(p => p.isRecurring); if (subscriptions.length === 0) { el.subscriptionList.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Gösterilecek abonelik bulunmuyor.</p>'; return; } el.subscriptionList.innerHTML = ''; let monthlyTotal = 0; subscriptions.forEach(p => { const card = cards.find(c => c.id === p.cardId); const monthlyCost = parseFloat(p.totalAmount) / parseInt(p.installmentsCount); monthlyTotal += monthlyCost; const subEl = document.createElement('div'); subEl.className = 'flex justify-between items-center bg-slate-700 p-4 rounded-lg border border-slate-600'; subEl.innerHTML = ` <div> <p class="font-semibold text-white">${p.purchaseName}</p> <p class="text-sm text-slate-300">${p.category || 'Diğer'}</p> <p class="text-xs text-slate-400">Kart: ${card ? card.cardName : 'Bilinmeyen'}</p> </div> <div class="text-right flex items-center space-x-3"> <div> <p class="font-semibold text-lg text-white">${formatCurrency(monthlyCost)}</p> <p class="text-xs text-slate-400">aylık</p> </div> <div class="flex flex-col space-y-2"> <button data-id="${p.id}" class="edit-subscription-btn text-blue-400 hover:text-blue-300" title="Düzenle"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button> <button data-id="${p.id}" class="cancel-subscription-btn text-red-400 hover:text-red-300" title="Aboneliği İptal Et"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button> </div> </div>`; el.subscriptionList.appendChild(subEl); }); const summaryEl = document.createElement('div'); summaryEl.className = 'mt-6 pt-4 border-t border-slate-700 text-right'; summaryEl.innerHTML = `<p class="text-sm text-slate-300">Aylık Toplam Abonelik Gideri</p><p class="font-bold text-2xl text-white">${formatCurrency(monthlyTotal)}</p>`; el.subscriptionList.appendChild(summaryEl); }
             function calculatePaymentSchedule() { const schedule = {}; purchases.forEach(p => { const card = cards.find(c => c.id === p.cardId); if (!card) return; const purchaseDate = dayjs(p.purchaseDate); const statementDay = parseInt(card.statementDay); const installmentAmount = parseFloat(p.totalAmount) / parseInt(p.installmentsCount); let firstStatementDate = purchaseDate.date(statementDay); if (purchaseDate.date() > statementDay) firstStatementDate = firstStatementDate.add(1, 'month'); for (let i = 0; i < p.installmentsCount; i++) { const currentStatementDate = firstStatementDate.add(i, 'month'); const dueDate = currentStatementDate.add(10, 'days'); const paymentMonthKey = dueDate.format('YYYY-MM'); if (!schedule[paymentMonthKey]) schedule[paymentMonthKey] = { total: 0, unpaidTotal: 0, details: {} }; if (!schedule[paymentMonthKey].details[p.cardId]) schedule[paymentMonthKey].details[p.cardId] = { amount: 0, dueDate: dueDate.format('YYYY-MM-DD') }; schedule[paymentMonthKey].details[p.cardId].amount += installmentAmount; schedule[paymentMonthKey].total += installmentAmount; const paymentKey = `${paymentMonthKey}_${p.cardId}`; if (!userSettings?.paidMonths?.[paymentKey]) schedule[paymentMonthKey].unpaidTotal += installmentAmount; } }); return schedule; }
             
-            // --- HATA DÜZELTİLDİ & YENİDEN DÜZENLENDİ: Bu fonksiyon artık daha temiz ve doğru çalışıyor. ---
             function renderPaymentPlan(schedule, selectedMonthKey) {
                 if (!el.paymentPlan) return;
 
                 let content = '';
                 let hasAnyPayment = false;
 
-                // "Tüm Aylar" seçeneği için ayrı mantık
                 if (selectedMonthKey === 'all') {
                     const monthsToRender = Object.keys(schedule).filter(m => schedule[m].unpaidTotal > 0).sort();
-                    
                     monthsToRender.forEach((monthKey, index) => {
                         const monthData = schedule[monthKey];
                         let monthCardsContent = '';
-                        
-                        // İlgili ayın kart ödemelerini işle
                         Object.keys(monthData.details).forEach(cardId => {
                             const paymentData = monthData.details[cardId];
                             const card = cards.find(c => c.id === cardId);
@@ -528,19 +505,15 @@
                                 monthCardsContent += `<div class="bg-slate-900/50 p-4 rounded-lg border ${lateClass}"><div class="flex justify-between items-center"><div><p class="font-bold text-white">${card.cardName}</p><p class="text-xs text-slate-400">Son Ödeme: ${dueDate.format('DD MMMM YYYY')}</p></div><p class="text-xl font-semibold text-white">${formatCurrency(paymentData.amount)}</p></div><div class="mt-3 text-right"><button data-key="${paymentKey}" class="pay-btn text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">Ödendi Olarak İşaretle</button></div></div>`;
                             }
                         });
-
-                        // Sadece içinde ödenecek kart olan aylar için başlık ekle
                         if (monthCardsContent) {
                             content += `<div class="${index > 0 ? 'mt-8' : ''}"><h3 class="text-lg font-semibold text-white border-b border-slate-600 pb-2 mb-4">${dayjs(monthKey).format('MMMM YYYY')}</h3><div class="space-y-4">${monthCardsContent}</div></div>`;
                         }
                     });
                 } else {
-                    // Tek bir ay seçildiğinde çalışacak mantık
                     const monthData = schedule[selectedMonthKey];
                     if (monthData) {
                         let monthCardsContent = '';
                         let unpaidTotalForMonth = 0;
-
                         Object.keys(monthData.details).forEach(cardId => {
                             const paymentData = monthData.details[cardId];
                             const card = cards.find(c => c.id === cardId);
@@ -555,7 +528,6 @@
                                 monthCardsContent += `<div class="bg-slate-900/50 p-4 rounded-lg border ${lateClass}"><div class="flex justify-between items-center"><div><p class="font-bold text-white">${card.cardName}</p><p class="text-xs text-slate-400">Son Ödeme: ${dueDate.format('DD MMMM YYYY')}</p></div><p class="text-xl font-semibold text-white">${formatCurrency(paymentData.amount)}</p></div><div class="mt-3 text-right"><button data-key="${paymentKey}" class="pay-btn text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">Ödendi Olarak İşaretle</button></div></div>`;
                             }
                         });
-
                         if (monthCardsContent) {
                             content = `<div class="space-y-4">${monthCardsContent}</div><div class="mt-6 pt-4 border-t border-slate-700 text-right"><p class="text-sm text-slate-300">${dayjs(selectedMonthKey).format('MMMM YYYY')} Kalan Toplam Ödeme</p><p class="font-bold text-2xl text-red-500">${formatCurrency(unpaidTotalForMonth)}</p></div>`;
                         }
@@ -589,8 +561,8 @@
                 if (form.id === 'add-purchase-form') {
                     const newPurchase = { purchaseName: form.elements['purchase-name'].value, purchaseDate: form.elements['purchase-date'].value, totalAmount: parseFloat(form.elements['total-amount'].value), installmentsCount: parseInt(form.elements['installments-count'].value), cardId: form.elements['card-select'].value, category: form.elements['purchase-category'].value, isRecurring: form.elements['purchase-recurring'].checked, createdAt: serverTimestamp() };
                     
-                    monthSelectorExpanded = false;
                     selectedPlanMonth = getFirstPaymentMonthKey(newPurchase);
+                    localStorage.setItem('selectedPlanMonth', selectedPlanMonth);
 
                     await addDoc(collection(db, 'users', currentUser.uid, 'purchases'), newPurchase);
                     form.reset();
@@ -623,17 +595,11 @@
                     if (e.target.id === 'privacy-mode-toggle') updateSettings({ privacyMode: e.target.checked });
                     if (e.target.id === 'plan-month-selector') {
                         selectedPlanMonth = e.target.value;
+                        localStorage.setItem('selectedPlanMonth', selectedPlanMonth);
                         renderPaymentPlan(calculatePaymentSchedule(), selectedPlanMonth);
                     }
                 });
                 document.body.addEventListener('click', handleBodyClicks);
-
-                el.planMonthSelector.addEventListener('mousedown', () => {
-                    if (!monthSelectorExpanded) {
-                        monthSelectorExpanded = true;
-                        populateMonthSelector(calculatePaymentSchedule(), selectedPlanMonth);
-                    }
-                });
             }
             async function handleBodyClicks(e) {
                 const btn = e.target.closest('button');
@@ -643,18 +609,18 @@
                 if (btn.matches('.pay-btn')) { 
                     const newPaidStatus = { ...userSettings.paidMonths, [key]: { paidDate: dayjs().toISOString() } };
                     await updateSettings({ paidMonths: newPaidStatus });
-                    monthSelectorExpanded = false;
                     selectedPlanMonth = findFirstUnpaidMonth(calculatePaymentSchedule());
-                    refreshUI(); // refreshUI'ı burada çağırarak anında güncelleme sağlıyoruz.
+                    localStorage.setItem('selectedPlanMonth', selectedPlanMonth);
+                    refreshUI();
                     return;
                 }
                 if (btn.matches('.undo-pay-btn')) { 
                     const newPaidStatus = { ...userSettings.paidMonths };
                     delete newPaidStatus[key];
                     await updateSettings({ paidMonths: newPaidStatus });
-                    monthSelectorExpanded = false;
-                    selectedPlanMonth = findFirstUnpaidMonth(calculatePaymentSchedule());
-                    refreshUI(); // refreshUI'ı burada çağırarak anında güncelleme sağlıyoruz.
+                    selectedPlanMonth = key.split('_')[0]; // Geri alınan ay'ı tekrar seçili yap
+                    localStorage.setItem('selectedPlanMonth', selectedPlanMonth);
+                    refreshUI();
                     return;
                 }
 
@@ -684,12 +650,8 @@
                 if ('serviceWorker' in navigator) {
                     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then(reg => console.log('Service Worker registered.')).catch(err => console.log('Service Worker registration failed:', err)); });
                 }
-                
                 bindEventListeners();
-                selectedPlanMonth = null;
-                monthSelectorExpanded = false; 
                 el.purchaseDateInput.valueAsDate = new Date();
-                
             }
 
             init();
