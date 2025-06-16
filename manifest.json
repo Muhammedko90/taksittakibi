@@ -1,0 +1,21 @@
+{
+  "name": "MAK Taksit Asistanı",
+  "short_name": "MAK Taksit",
+  "description": "Muhammed için kişisel taksit takip asistanı.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#6d28d9",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/6d28d9/ffffff?text=MAK",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://placehold.co/512x512/6d28d9/ffffff?text=MAK",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
