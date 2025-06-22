@@ -234,6 +234,11 @@
                     </form>
                     <div id="card-list" class="mt-6 space-y-4"></div>
                 </div>
+                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4 dark:text-white">Veri Yedekleme</h2>
+                    <p class="text-sm text-slate-400 mb-4">Tüm kart ve harcama verilerinizi JSON formatında bilgisayarınıza indirin.</p>
+                    <button id="backup-data-btn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 font-semibold transition-colors">Yedeklemeyi Başlat</button>
+                </div>
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
                     <h2 class="text-xl font-bold mb-4 dark:text-white">Gizlilik</h2>
                     <div class="flex items-center justify-between">
@@ -847,7 +852,30 @@
                 doc.save(`harcama-raporu-${dayjs().format('YYYY-MM-DD')}.pdf`);
                 showInfoModal('Raporunuz başarıyla PDF olarak indirildi.', 'Başarılı', 'success');
             }
+             function handleBackupData() {
+                if (!currentUser) {
+                    showInfoModal('Yedekleme için giriş yapmış olmalısınız.', 'Hata', 'error');
+                    return;
+                }
 
+                const backupData = {
+                    cards: cards,
+                    purchases: purchases,
+                    settings: userSettings
+                };
+
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `mak-taksit-asistani-yedek-${dayjs().format('YYYY-MM-DD')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showInfoModal('Verileriniz başarıyla yedeklendi ve indiriliyor.', 'Başarılı', 'success');
+            }
             // --- OLAY İŞLEYİCİLER (EVENT HANDLERS) ---
             async function handleFormSubmits(e) {
                 if (!currentUser) return;
@@ -956,6 +984,7 @@
                 if (btn.matches('.quick-range-btn')) { handleQuickReportRange(btn.dataset.range); return; } 
                 if (btn.id === 'generate-report-btn') { handleGenerateReport(); return; } 
                 if (btn.id === 'export-pdf-btn') { exportReportAsPDF(); return; } 
+                if (btn.id === 'backup-data-btn') { handleBackupData(); return; }
                 if (btn.id === 'delete-all-data-btn') { handleDeleteAllData(); return; } 
                 if (btn.id === 'cancel-delete-btn') { closeDeleteModal(); return; }
                 if (btn.id === 'cancel-edit-purchase-btn') { closeEditPurchaseModal(); return; }
@@ -968,11 +997,10 @@
                 if (btn.matches('.cancel-subscription-btn')) { handleCancelSubscription(id); return; }
             }
             
-            // GÜNCELLENDİ: Silme işlemi sonrası anında UI güncellemesi için düzenlendi.
             async function handleConfirmDelete() {
                 if (!currentUser) return;
-                const { id, type, element } = { ...itemToDelete }; // Copy item
-                itemToDelete = {}; // Clear immediately
+                const { id, type, element } = { ...itemToDelete }; 
+                itemToDelete = {}; 
 
                 if (element) element.classList.add('item-fade-out');
 
@@ -980,7 +1008,6 @@
                     try {
                         if (type === 'purchase') {
                             await deleteDoc(doc(db, 'users', currentUser.uid, 'purchases', id));
-                            // onSnapshot will fire, but we update the local state for instant UI feedback
                             const initialPurchaseCount = purchases.length;
                             purchases = purchases.filter(p => p.id !== id);
                             if (purchases.length < initialPurchaseCount) {
@@ -998,7 +1025,6 @@
                             });
                             
                             await batch.commit();
-                            // Let the onSnapshot listeners for both cards and purchases handle the UI update
                         }
                     } catch (error) {
                         console.error("Silme işlemi sırasında hata:", error);
