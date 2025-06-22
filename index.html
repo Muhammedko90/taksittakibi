@@ -44,12 +44,6 @@
         #onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9998; display: none; }
         #onboarding-tooltip { position: fixed; z-index: 9999; background-color: #374151; color: white; padding: 1rem; border-radius: 0.5rem; max-width: 300px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); display: none; border: 1px solid var(--primary-color); }
         .onboarding-highlight { z-index: 9999; position: relative; box-shadow: 0 0 0 4px var(--primary-color); border-radius: 0.5rem; transition: box-shadow 0.3s ease-in-out; }
-        
-        /* Fiyat Değişim Animasyonu */
-        @keyframes price-up { 0% { background-color: transparent; } 50% { background-color: rgba(34, 197, 94, 0.3); } 100% { background-color: transparent; } }
-        @keyframes price-down { 0% { background-color: transparent; } 50% { background-color: rgba(239, 68, 68, 0.3); } 100% { background-color: transparent; } }
-        .price-up { animation: price-up 1s ease-out; }
-        .price-down { animation: price-down 1s ease-out; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-slate-200 transition-colors duration-300">
@@ -152,39 +146,6 @@
                 </div>
             </div>
 
-            <div id="panel-investments" class="main-panel space-y-8">
-                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
-                    <h2 class="text-xl font-bold mb-4 dark:text-white">Yeni Yatırım Ekle</h2>
-                    <form id="add-investment-form" class="space-y-4">
-                       <input type="text" id="investment-name" placeholder="Yatırım Adı (Örn: Gram Altın)" class="mt-1 block w-full px-3 py-2 border dark:border-slate-600 rounded-md bg-white dark:bg-slate-700" required>
-                       <select id="investment-type" class="mt-1 block w-full pl-3 pr-10 py-2 border dark:border-slate-600 rounded-md bg-white dark:bg-slate-700" required>
-                           <option value="">Yatırım Türü Seçin</option>
-                           <option value="Altın">Altın</option>
-                           <option value="Döviz">Döviz</option>
-                           <option value="Gümüş">Gümüş</option>
-                           <option value="Parite">Parite</option>
-                           <option value="Emtia">Emtia</option>
-                           <option value="Kripto Para">Kripto Para</option>
-                           <option value="Hisse Senedi/Fon">Hisse Senedi/Fon</option>
-                           <option value="Diğer">Diğer</option>
-                       </select>
-                       <input type="number" id="investment-amount" step="0.01" min="0" placeholder="Maliyet (₺)" class="mt-1 block w-full px-3 py-2 border dark:border-slate-600 rounded-md bg-white dark:bg-slate-700" required>
-                       <p class="text-xs text-slate-500 mt-1">Bu yatırımın size toplam maliyetini girin.</p>
-                       <button type="submit" class="w-full text-white py-2 px-4 rounded-md font-semibold transition-colors" style="background-color: var(--primary-color);">Yatırımı Ekle</button>
-                    </form>
-                </div>
-                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold dark:text-white">Yatırımlarınız (Portföy)</h2>
-                        <button id="refresh-all-prices-btn" class="text-sm bg-sky-600 hover:bg-sky-700 text-white font-semibold px-3 py-2 rounded-md flex items-center justify-center gap-2">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 12A8 8 0 1013 5.372" /></svg>
-                            Fiyatları Yenile
-                        </button>
-                    </div>
-                    <div id="investment-list" class="space-y-4"></div>
-                </div>
-            </div>
-            
             <div id="panel-history" class="main-panel space-y-8">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm">
                     <h2 class="text-xl font-bold mb-4 dark:text-white">Ödeme Geçmişi</h2>
@@ -284,7 +245,6 @@
             <button data-panel="home" class="bottom-nav-btn active flex flex-col items-center justify-center text-slate-400 w-full h-full rounded-lg m-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span class="text-xs mt-1">Ana Sayfa</span></button>
             <button data-panel="purchases" class="bottom-nav-btn flex flex-col items-center justify-center text-slate-400 w-full h-full rounded-lg m-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg><span class="text-xs mt-1">Harcamalar</span></button>
             <button data-panel="debts" class="bottom-nav-btn flex flex-col items-center justify-center text-slate-400 w-full h-full rounded-lg m-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8h6m-5 4h.01M4.882 16.118A2.25 2.25 0 006.75 18H17.25a2.25 2.25 0 001.868-1.882l-2.024-7.084A2.25 2.25 0 0015.226 7H8.774a2.25 2.25 0 00-1.868 2.034L4.882 16.118z" /></svg><span class="text-xs mt-1">Borçlar</span></button>
-            <button data-panel="investments" class="bottom-nav-btn flex flex-col items-center justify-center text-slate-400 w-full h-full rounded-lg m-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg><span class="text-xs mt-1">Yatırımlar</span></button>
             <button data-panel="history" class="bottom-nav-btn flex flex-col items-center justify-center text-slate-400 w-full h-full rounded-lg m-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span class="text-xs mt-1">Geçmiş</span></button>
             <button data-panel="reports" class="bottom-nav-btn flex flex-col items-center justify-center text-slate-400 w-full h-full rounded-lg m-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg><span class="text-xs mt-1">Raporlar</span></button>
             <button data-panel="settings" class="bottom-nav-btn flex flex-col items-center justify-center text-slate-400 w-full h-full rounded-lg m-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span class="text-xs mt-1">Ayarlar</span></button>
@@ -298,8 +258,6 @@
     <div id="edit-purchase-modal" class="modal bg-slate-800 p-6 rounded-2xl shadow-xl max-w-lg w-full"></div>
     <div id="edit-card-modal-backdrop" class="modal-backdrop"></div>
     <div id="edit-card-modal" class="modal bg-slate-800 p-6 rounded-2xl shadow-xl max-w-lg w-full"></div>
-    <div id="edit-investment-modal-backdrop" class="modal-backdrop"></div>
-    <div id="edit-investment-modal" class="modal bg-slate-800 p-6 rounded-2xl shadow-xl max-w-lg w-full"></div>
     <div id="info-modal-backdrop" class="modal-backdrop"></div>
     <div id="info-modal" class="modal bg-slate-800 p-6 rounded-lg shadow-xl max-w-sm w-full"></div>
 
@@ -350,10 +308,9 @@
                 let cards = [];
                 let purchases = [];
                 let debts = [];
-                let investments = [];
                 let userSettings = {};
                 let currentUser = null;
-                let unsubscribeCards, unsubscribePurchases, unsubscribeSettings, unsubscribeDebts, unsubscribeInvestments;
+                let unsubscribeCards, unsubscribePurchases, unsubscribeSettings, unsubscribeDebts;
                 let historyCurrentPage = 1;
                 const HISTORY_ITEMS_PER_PAGE = 5;
                 let reportCurrentPage = 1;
@@ -366,7 +323,7 @@
                 let confirmCallback = null;
                 let selectedPlanMonth = null;
 
-                // --- DOM ELEMENTLERİ ---
+                // --- DOM ELEMENTLERİ (İlgili referanslar kaldırıldı) ---
                 const el = {
                     authContainer: document.getElementById('auth-container'),
                     appContainer: document.getElementById('app-container'),
@@ -382,11 +339,8 @@
                     editPurchaseBackdrop: document.getElementById('edit-purchase-modal-backdrop'),
                     editCardModal: document.getElementById('edit-card-modal'),
                     editCardBackdrop: document.getElementById('edit-card-modal-backdrop'),
-                    editInvestmentModal: document.getElementById('edit-investment-modal'),
-                    editInvestmentBackdrop: document.getElementById('edit-investment-modal-backdrop'),
                     cardList: document.getElementById('card-list'),
                     debtList: document.getElementById('debt-list'),
-                    investmentList: document.getElementById('investment-list'),
                     purchaseList: document.getElementById('purchase-list-details'),
                     paymentPlan: document.getElementById('payment-plan'),
                     historyList: document.getElementById('history-list'),
@@ -412,7 +366,14 @@
                     onboardingNext: document.getElementById('onboarding-next'),
                 };
 
-                // --- KİMLİK DOĞRULAMA (AUTHENTICATION) ---
+                // Kalan kodun tamamı, yatırım modülü ile ilgili tüm referanslar, fonksiyonlar ve HTML elementleri çıkarılarak güncellendi.
+                // Bu kodun devamı, bir önceki versiyondaki gibidir, sadece yatırım ile ilgili kısımlar silinmiştir.
+                // Örnek olarak, `listenToData` fonksiyonu artık `investments` koleksiyonunu dinlemiyor.
+                // `handleFormSubmits` ve `handleBodyClicks` fonksiyonlarından yatırım ile ilgili tüm koşullar ve eylemler kaldırıldı.
+                // `handleConfirmDelete` fonksiyonundan yatırım silme mantığı çıkarıldı.
+                // Tüm bu değişiklikler, kodun bütünlüğünü koruyarak istenen geri alma işlemini gerçekleştirir.
+                
+                 // --- KİMLİK DOĞRULAMA (AUTHENTICATION) ---
                 onAuthStateChanged(auth, user => {
                     if (user) {
                         currentUser = user;
@@ -430,8 +391,7 @@
                         if (unsubscribePurchases) unsubscribePurchases();
                         if (unsubscribeSettings) unsubscribeSettings();
                         if (unsubscribeDebts) unsubscribeDebts();
-                        if (unsubscribeInvestments) unsubscribeInvestments();
-                        cards = []; purchases = []; userSettings = {}; debts = []; investments = [];
+                        cards = []; purchases = []; userSettings = {}; debts = [];
                     }
                 });
 
@@ -463,8 +423,8 @@
                         refreshUI();
                     });
 
-                    const collections = { cards: 'cards', purchases: 'purchases', debts: 'debts', investments: 'investments' };
-                    const unsubscribers = { cards: unsubscribeCards, purchases: unsubscribePurchases, debts: unsubscribeDebts, investments: unsubscribeInvestments };
+                    const collections = { cards: 'cards', purchases: 'purchases', debts: 'debts' };
+                    const unsubscribers = { cards: unsubscribeCards, purchases: unsubscribePurchases, debts: unsubscribeDebts };
                     
                     Object.entries(collections).forEach(([stateKey, collectionName]) => {
                         if (unsubscribers[stateKey]) unsubscribers[stateKey]();
@@ -492,13 +452,7 @@
                     el.editPurchaseModal.style.display = 'block'; el.editPurchaseBackdrop.style.display = 'block';
                 }
                 function closeEditPurchaseModal() { el.editPurchaseModal.style.display = 'none'; el.editPurchaseBackdrop.style.display = 'none'; }
-                function openEditInvestmentModal(id) {
-                    const investment = investments.find(inv => inv.id === id); if (!investment) return;
-                    el.editInvestmentModal.innerHTML = `<h2 class="text-xl font-bold mb-4 text-white">Yatırımı Güncelle</h2><form id="edit-investment-form" class="space-y-4"><input type="hidden" id="edit-investment-id" value="${investment.id}"><div><label class="block text-sm font-medium">Yatırım Adı</label><p class="text-white font-semibold">${investment.investmentName}</p></div><div><label for="edit-investment-value" class="block text-sm font-medium">Mevcut Değer (₺)</label><input type="number" id="edit-investment-value" step="0.01" value="${investment.currentValue || investment.cost}" class="mt-1 block w-full border-slate-600 rounded-md p-2 bg-slate-700" required></div><div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-edit-investment-btn" class="bg-slate-600 px-4 py-2 rounded-md">İptal</button><button type="submit" class="text-white px-4 py-2 rounded-md" style="background-color: var(--primary-color);">Güncelle</button></div></form>`;
-                    el.editInvestmentModal.style.display = 'block'; el.editInvestmentBackdrop.style.display = 'block';
-                }
-                function closeEditInvestmentModal() { el.editInvestmentModal.style.display = 'none'; el.editInvestmentBackdrop.style.display = 'none'; }
-
+                
 
                 // --- YENİ KULLANICI TURU (ONBOARDING) ---
                 const onboardingSteps = [
@@ -562,7 +516,6 @@
                     renderCards(paymentSchedule); 
                     renderPurchasesList();
                     renderDebts();
-                    renderInvestments();
                     updateCardSelects();
                     populateCategorySelects();
                     populateCardFilterSelect();
@@ -573,7 +526,7 @@
                     const oldValue = el.planMonthSelector.value;
                     el.planMonthSelector.innerHTML = ''; 
                     const allUnpaidMonths = Object.keys(schedule).filter(m => schedule[m].unpaidTotal > 0).sort();
-                    allUnpaidMonths.forEach(monthKey => { el.planMonthSelector.add(new Option(dayjs(monthKey).format('MMMM YYYY'), monthKey)); });
+                    allUnpaidMonths.forEach(monthKey => { el.planMonthSelector.add(new Option(dayjs(monthKey).format('MMMMYYYY'), monthKey)); });
                     el.planMonthSelector.add(new Option('Tüm Aylar', 'all'));
                     el.planMonthSelector.value = el.planMonthSelector.querySelector(`[value="${oldValue}"]`) ? oldValue : currentSelection;
                 }
@@ -621,24 +574,6 @@
                         debtEl.className = 'bg-slate-700 p-4 rounded-lg border border-slate-600';
                         debtEl.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-semibold text-lg text-white">${debt.debtName}</p><p class="text-xs text-slate-400">Aylık Ödeme: ${formatCurrency(debt.monthlyPayment)} | Sonraki Ödeme: Ayın ${debt.dueDay}. günü</p></div><div class="flex items-center space-x-2"><button data-id="${debt.id}" class="pay-debt-btn text-sm bg-green-900/50 text-green-300 font-semibold px-3 py-1 rounded-md hover:bg-green-800/50">Ödeme Yap</button><button data-id="${debt.id}" class="delete-debt-btn text-sm bg-red-900/50 text-red-300 font-semibold px-3 py-1 rounded-md hover:bg-red-800/50">Sil</button></div></div><div class="mt-3"><div class="w-full bg-slate-600 rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full" style="width: ${progress}%"></div></div><div class="flex justify-between text-xs mt-1"><span class="text-slate-400">Ödenen: <span class="font-medium text-white">${formatCurrency(debt.paidAmount || 0)}</span></span><span class="text-slate-400">Kalan: <span class="font-medium text-red-400">${formatCurrency(remainingAmount)}</span></span></div></div>`;
                         el.debtList.appendChild(debtEl);
-                    });
-                }
-                
-                function renderInvestments() {
-                    if (!el.investmentList) return;
-                    el.investmentList.innerHTML = investments.length === 0 ? `<div class="text-center py-8"><p class="text-sm text-slate-400">Henüz bir yatırım eklemediniz.</p><p class="text-xs text-slate-500 mt-2">Tarayıcı güvenlik kısıtlamaları (CORS) nedeniyle canlı veri çekilememektedir.<br>Fiyatlar simülasyon olarak güncellenir.</p></div>` : '';
-                    investments.sort((a,b) => b.cost - a.cost).forEach(inv => {
-                        const cost = parseFloat(inv.cost);
-                        const value = parseFloat(inv.currentValue || inv.cost);
-                        const gainLoss = value - cost;
-                        const gainLossPercent = cost > 0 ? (gainLoss / cost) * 100 : 0;
-                        const colorClass = gainLoss >= 0 ? 'text-green-400' : 'text-red-400';
-                        const sign = gainLoss >= 0 ? '+' : '';
-                        const invEl = document.createElement('div');
-                        invEl.className = 'bg-slate-700 p-4 rounded-lg border border-slate-600 transition-all duration-200';
-                        invEl.dataset.investmentId = inv.id;
-                        invEl.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-semibold text-lg text-white">${inv.investmentName}</p><p class="text-xs text-slate-400">${inv.type}</p></div><div class="text-right"><p class="font-semibold text-xl text-white">${formatCurrency(value)}</p><p class="text-sm font-medium ${colorClass}">${sign}${formatCurrency(gainLoss)} (${gainLossPercent.toFixed(2)}%)</p></div></div><div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-600/50"><p class="text-xs text-slate-400">Maliyet: ${formatCurrency(cost)}</p><div class="flex items-center space-x-2"><button data-id="${inv.id}" class="edit-investment-btn text-sm bg-blue-900/50 text-blue-300 font-semibold px-3 py-1 rounded-md hover:bg-blue-800/50">Değeri Gir</button><button data-id="${inv.id}" class="delete-investment-btn text-sm bg-red-900/50 text-red-300 font-semibold px-3 py-1 rounded-md hover:bg-red-800/50">Sil</button></div></div>`;
-                        el.investmentList.appendChild(invEl);
                     });
                 }
                 
@@ -713,9 +648,9 @@
                 function handleGenerateReport() { const startDate = document.getElementById('start-date').value; const endDate = document.getElementById('end-date').value; if (!startDate || !endDate) { showInfoModal('Lütfen bir başlangıç ve bitiş tarihi seçin.', 'Uyarı', 'error'); return; } currentReportData = purchases.filter(p => dayjs(p.purchaseDate).isBetween(startDate, endDate, null, '[]')).sort((a,b) => dayjs(b.purchaseDate) - dayjs(a.purchaseDate)); reportCurrentPage = 1; renderReportPage(); }
                 function renderReportPage() { if (!el.reportList) return; if (currentReportData.length === 0) { el.reportList.innerHTML = '<p class="text-center text-slate-400">Seçili tarih aralığında raporlanacak veri bulunamadı.</p>'; el.reportSummary.innerHTML = ''; el.reportPagination.innerHTML = ''; el.reportExport.innerHTML = ''; return; } const totalPages = Math.ceil(currentReportData.length / REPORT_ITEMS_PER_PAGE); reportCurrentPage = Math.max(1, Math.min(reportCurrentPage, totalPages)); const startIndex = (reportCurrentPage - 1) * REPORT_ITEMS_PER_PAGE; const pageItems = currentReportData.slice(startIndex, startIndex + REPORT_ITEMS_PER_PAGE); el.reportList.innerHTML = pageItems.map(p => { const card = cards.find(c => c.id === p.cardId); return `<div class="bg-slate-700 p-4 rounded-lg"><p class="font-semibold">${p.purchaseName}</p><p class="text-sm text-slate-300">${p.category||'Diğer'} - ${formatCurrency(p.totalAmount)}</p><p class="text-xs text-slate-400">${dayjs(p.purchaseDate).format('DD.MM.YYYY')} - ${card?.cardName||'Bilinmeyen'}</p></div>`;}).join(''); const total = currentReportData.reduce((sum, p) => sum + parseFloat(p.totalAmount), 0); el.reportSummary.innerHTML = `Toplam Harcama: ${formatCurrency(total)}`; el.reportExport.innerHTML = `<button id="export-pdf-btn" class="bg-red-600 text-white py-2 px-4 rounded-md font-semibold">PDF İndir</button>`; let paginationContent = ''; if (totalPages > 1) { paginationContent = `<button id="report-prev-btn" class="px-4 py-2 text-sm bg-slate-600 rounded-md disabled:opacity-50" ${reportCurrentPage===1?'disabled':''}>Geri</button><span class="text-sm">${reportCurrentPage}/${totalPages}</span><button id="report-next-btn" class="px-4 py-2 text-sm bg-slate-600 rounded-md disabled:opacity-50" ${reportCurrentPage===totalPages?'disabled':''}>İleri</button>`; } el.reportPagination.innerHTML = paginationContent; }
                 function exportReportAsPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.setFont('Helvetica', 'normal'); doc.text("Harcama Raporu", 14, 22); const tableColumn = ["Tarih", "Aciklama", "Kategori", "Kart", "Tutar (TL)"]; const tableRows = []; let totalAmount = 0; currentReportData.forEach(p => { const card = cards.find(c => c.id === p.cardId); const purchaseData = [ dayjs(p.purchaseDate).format('DD.MM.YYYY'), p.purchaseName, p.category || 'Diger', card ? card.cardName : 'Bilinmiyor', parseFloat(p.totalAmount).toFixed(2) ]; tableRows.push(purchaseData); totalAmount += parseFloat(p.totalAmount); }); doc.autoTable({ head: [tableColumn], body: tableRows, startY: 35 }); doc.text(`Toplam Harcama: ${totalAmount.toFixed(2)} TL`, 14, doc.lastAutoTable.finalY + 15); doc.save(`harcama-raporu.pdf`); }
-                function handleBackupData() { if (!currentUser) return; const backupData = { cards, purchases, settings: userSettings, debts, investments }; const jsonString = JSON.stringify(backupData, null, 2); const blob = new Blob([jsonString], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `mak-taksit-yedek.json`; a.click(); URL.revokeObjectURL(a.href); }
+                function handleBackupData() { if (!currentUser) return; const backupData = { cards, purchases, settings: userSettings, debts }; const jsonString = JSON.stringify(backupData, null, 2); const blob = new Blob([jsonString], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `mak-taksit-yedek.json`; a.click(); URL.revokeObjectURL(a.href); }
                 function handleRestoreData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (data.cards && data.purchases && data.settings) { showConfirmModal('Mevcut tüm verileriniz silinecek ve yedekten geri yüklenecektir. Emin misiniz?', 'Yedekten Geri Yükle', () => processRestore(data)); } else { showInfoModal('Geçersiz yedek dosyası.', 'Hata', 'error'); } } catch (err) { showInfoModal('Yedek dosyası okunurken hata oluştu.', 'Hata', 'error'); } }; reader.readAsText(file); }
-                async function processRestore(data) { if (!currentUser) return; const batch = writeBatch(db); const collectionsToWipe = ['cards','purchases','debts','investments']; for(const coll of collectionsToWipe){ const snapshot = await getDocs(collection(db, 'users', currentUser.uid, coll)); snapshot.forEach(doc => batch.delete(doc.ref)); } data.cards?.forEach(item=>batch.set(doc(collection(db,'users',currentUser.uid,'cards')),item)); data.purchases?.forEach(item=>batch.set(doc(collection(db,'users',currentUser.uid,'purchases')),item)); data.debts?.forEach(item=>batch.set(doc(collection(db,'users',currentUser.uid,'debts')),item)); data.investments?.forEach(item=>batch.set(doc(collection(db,'users',currentUser.uid,'investments')),item)); batch.set(doc(db,'users',currentUser.uid,'settings','userProfile'), data.settings); await batch.commit(); showInfoModal('Veriler başarıyla geri yüklendi.', 'Başarılı', 'success'); }
+                async function processRestore(data) { if (!currentUser) return; const batch = writeBatch(db); const collectionsToWipe = ['cards','purchases','debts']; for(const coll of collectionsToWipe){ const snapshot = await getDocs(collection(db, 'users', currentUser.uid, coll)); snapshot.forEach(doc => batch.delete(doc.ref)); } data.cards?.forEach(item=>batch.set(doc(collection(db,'users',currentUser.uid,'cards')),item)); data.purchases?.forEach(item=>batch.set(doc(collection(db,'users',currentUser.uid,'purchases')),item)); data.debts?.forEach(item=>batch.set(doc(collection(db,'users',currentUser.uid,'debts')),item)); batch.set(doc(db,'users',currentUser.uid,'settings','userProfile'), data.settings); await batch.commit(); showInfoModal('Veriler başarıyla geri yüklendi.', 'Başarılı', 'success'); }
                 
                 function suggestCategory() {
                     const name = el.purchaseNameInput.value.toLowerCase(); if (!name) return;
@@ -735,24 +670,6 @@
                     const blob = new Blob([icsString], { type: 'text/calendar;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `odeme-plani-${monthKey}.ics`; a.click(); URL.revokeObjectURL(a.href);
                 }
                 
-                async function simulatePriceUpdate(investmentId) {
-                    const investment = investments.find(i => i.id === investmentId);
-                    if (!investment) return;
-                    const currentValue = parseFloat(investment.currentValue || investment.cost);
-                    const changePercent = (Math.random() * 3) - 1.5; // -1.5% to +1.5%
-                    const newValue = currentValue * (1 + changePercent / 100);
-
-                    const itemElement = document.querySelector(`[data-investment-id="${investmentId}"]`);
-                    if(itemElement) {
-                        itemElement.classList.remove('price-up', 'price-down');
-                        // Force reflow
-                        void itemElement.offsetWidth;
-                        itemElement.classList.add(newValue > currentValue ? 'price-up' : 'price-down');
-                    }
-                    
-                    await updateDoc(doc(db, 'users', currentUser.uid, 'investments', investmentId), { currentValue: newValue });
-                }
-
                 // --- OLAY İŞLEYİCİLER (EVENT HANDLERS) ---
                 async function handleFormSubmits(e) {
                     if (!currentUser) return;
@@ -764,8 +681,6 @@
                     else if (form.id === 'edit-card-form') { await updateDoc(doc(db, 'users', currentUser.uid, 'cards', form.elements['edit-card-id'].value), { cardName: form.elements['edit-card-name'].value, statementDay: parseInt(form.elements['edit-statement-day'].value), cardLimit: parseFloat(form.elements['edit-card-limit'].value) }); closeEditCardModal(); } 
                     else if (form.id === 'edit-purchase-form') { const updatedPurchase = { purchaseName: form.elements['edit-purchase-name'].value, purchaseDate: form.elements['edit-purchase-date'].value, totalAmount: parseFloat(form.elements['edit-total-amount'].value), installmentsCount: parseInt(form.elements['edit-installments-count'].value), cardId: form.elements['edit-card-select'].value, category: form.elements['edit-purchase-category'].value, isRecurring: form.elements['edit-purchase-recurring'].checked, firstInstallmentMonth: form.elements['edit-first-installment-month'].value || null }; await updateDoc(doc(db, 'users', currentUser.uid, 'purchases', form.elements['edit-purchase-id'].value), updatedPurchase); closeEditPurchaseModal(); } 
                     else if (form.id === 'add-debt-form') { await addDoc(collection(db, 'users', currentUser.uid, 'debts'), { debtName: form.elements['debt-name'].value, totalAmount: parseFloat(form.elements['debt-total-amount'].value), monthlyPayment: parseFloat(form.elements['debt-monthly-payment'].value), dueDay: parseInt(form.elements['debt-due-day'].value), paidAmount: 0, createdAt: serverTimestamp() }); form.reset(); } 
-                    else if (form.id === 'add-investment-form') { const cost = parseFloat(form.elements['investment-amount'].value); await addDoc(collection(db, 'users', currentUser.uid, 'investments'), { investmentName: form.elements['investment-name'].value, type: form.elements['investment-type'].value, cost: cost, currentValue: cost, createdAt: serverTimestamp() }); form.reset(); } 
-                    else if (form.id === 'edit-investment-form') { await updateDoc(doc(db, 'users', currentUser.uid, 'investments', form.elements['edit-investment-id'].value), { currentValue: parseFloat(form.elements['edit-investment-value'].value) }); closeEditInvestmentModal(); }
                 }
                 
                 function bindEventListeners() {
@@ -809,7 +724,6 @@
                         '#cancel-delete-btn': () => closeDeleteModal(),
                         '#cancel-edit-purchase-btn': () => closeEditPurchaseModal(),
                         '#cancel-edit-card-btn': () => closeEditCardModal(),
-                        '#cancel-edit-investment-btn': () => closeEditInvestmentModal(),
                         '#confirm-delete-btn': () => handleConfirmDelete(),
                         '.delete-card-btn': () => { const card = cards.find(c => c.id === id); if(card) openDeleteModal(id, 'card', card.cardName, btn.closest('.bg-slate-700')); },
                         '.delete-purchase-btn': () => { const purchase = purchases.find(p => p.id === id); if(purchase) openDeleteModal(id, 'purchase', purchase.purchaseName, btn.closest('.flex')); },
@@ -818,9 +732,6 @@
                         '#export-calendar-btn': () => exportToCalendar(),
                         '.pay-debt-btn': async () => { const debt = debts.find(d => d.id === id); if (debt) { const newPaidAmount = (parseFloat(debt.paidAmount) || 0) + parseFloat(debt.monthlyPayment); await updateDoc(doc(db, 'users', currentUser.uid, 'debts', id), { paidAmount: newPaidAmount }); } },
                         '.delete-debt-btn': () => { const debt = debts.find(d => d.id === id); if(debt) openDeleteModal(id, 'debt', debt.debtName, btn.closest('.bg-slate-700')); },
-                        '.edit-investment-btn': () => openEditInvestmentModal(id),
-                        '.delete-investment-btn': () => { const inv = investments.find(i => i.id === id); if(inv) openDeleteModal(id, 'investment', inv.investmentName, btn.closest('.bg-slate-700')); },
-                        '#refresh-all-prices-btn': () => { investments.forEach(inv => simulatePriceUpdate(inv.id)); }
                     };
                     for (const selector in actions) { if (btn.matches(selector)) { actions[selector](); return; } }
                 }
@@ -832,7 +743,7 @@
                     if (element) element.classList.add('item-fade-out');
                     setTimeout(async () => {
                         try {
-                            const pathMap = { purchase: 'purchases', card: 'cards', debt: 'debts', investment: 'investments' };
+                            const pathMap = { purchase: 'purchases', card: 'cards', debt: 'debts' };
                             if(type === 'card'){
                                 const batch = writeBatch(db);
                                 batch.delete(doc(db, 'users', currentUser.uid, 'cards', id));
@@ -852,7 +763,7 @@
                     }, 300);
                 }
                 
-                async function handleDeleteAllData() { showConfirmModal('<b>Tüm verileriniz kalıcı olarak silinecektir.</b> Bu işlem geri alınamaz. Emin misiniz?', 'Tüm Verileri Sil', async () => { if(!currentUser) return; const batch = writeBatch(db); const collectionsToWipe = ['cards', 'purchases', 'debts', 'investments']; for (const collName of collectionsToWipe) { const snapshot = await getDocs(collection(db, 'users', currentUser.uid, collName)); snapshot.forEach(doc => batch.delete(doc.ref)); } await batch.commit(); showInfoModal('Tüm verileriniz başarıyla silindi.', 'Başarılı', 'success'); }, 'EVET, TÜMÜNÜ SİL'); }
+                async function handleDeleteAllData() { showConfirmModal('<b>Tüm verileriniz kalıcı olarak silinecektir.</b> Bu işlem geri alınamaz. Emin misiniz?', 'Tüm Verileri Sil', async () => { if(!currentUser) return; const batch = writeBatch(db); const collectionsToWipe = ['cards', 'purchases', 'debts']; for (const collName of collectionsToWipe) { const snapshot = await getDocs(collection(db, 'users', currentUser.uid, collName)); snapshot.forEach(doc => batch.delete(doc.ref)); } await batch.commit(); showInfoModal('Tüm verileriniz başarıyla silindi.', 'Başarılı', 'success'); }, 'EVET, TÜMÜNÜ SİL'); }
                 
                 function init() {
                     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Registration Failed:', err)); }); }
