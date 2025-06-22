@@ -711,25 +711,21 @@
                     .filter(m => schedule[m].unpaidTotal > 0)
                     .sort();
 
-                // 1. Gelecek ay için bir ödeme bulmaya çalış.
                 if (sortedUnpaidMonths.includes(nextMonthKey)) {
                     return nextMonthKey;
                 }
                 
-                // 2. Bu ay için bir ödeme bul.
                 const currentMonthKey = today.format('YYYY-MM');
                 if(sortedUnpaidMonths.includes(currentMonthKey)) {
                     return currentMonthKey;
                 }
 
-                // 3. Gelecekteki ilk ödenmemiş ayı bul.
                 for (const monthKey of sortedUnpaidMonths) {
                     if (dayjs(monthKey).isAfter(today, 'month')) {
                         return monthKey;
                     }
                 }
                 
-                // 4. Hiçbiri yoksa ilk ödenmemiş ayı göster
                 if(sortedUnpaidMonths.length > 0) {
                     return sortedUnpaidMonths[0];
                 }
@@ -904,7 +900,6 @@
                     if (firstInstallmentMonth) {
                         updatedPurchase.firstInstallmentMonth = firstInstallmentMonth;
                     } else {
-                        // Ensure the field is removed if empty
                         updatedPurchase.firstInstallmentMonth = null;
                     }
                     await updateDoc(doc(db, 'users', currentUser.uid, 'purchases', purchaseId), updatedPurchase);
@@ -972,9 +967,50 @@
                 if (btn.matches('.edit-purchase-btn') || btn.matches('.edit-subscription-btn')) { openEditPurchaseModal(id); return; } 
                 if (btn.matches('.cancel-subscription-btn')) { handleCancelSubscription(id); return; }
             }
+            
+            // GÜNCELLENDİ: Silme işlemi sonrası anında UI güncellemesi için düzenlendi.
+            async function handleConfirmDelete() {
+                if (!currentUser) return;
+                const { id, type, element } = { ...itemToDelete }; // Copy item
+                itemToDelete = {}; // Clear immediately
 
-            function handleDeleteAllData() { showConfirmModal('<b>Bu işlem KESİNLİKLE GERİ ALINAMAZ.</b><br><br>Tüm kart ve harcama verileriniz kalıcı olarak silinecektir. Devam etmek istediğinizden emin misiniz?', 'Tüm Verileri Sil', async () => { if(!currentUser) return; const batch = writeBatch(db); const cardsRef = collection(db, 'users', currentUser.uid, 'cards'); const purchasesRef = collection(db, 'users', currentUser.uid, 'purchases'); cards.forEach(c => batch.delete(doc(cardsRef, c.id))); purchases.forEach(p => batch.delete(doc(purchasesRef, p.id))); await batch.commit(); showInfoModal('Tüm verileriniz başarıyla silindi.', 'Başarılı', 'success'); }, 'EVET, TÜMÜNÜ SİL', 'İptal'); }
-            async function handleConfirmDelete() { if(!currentUser) return; if(itemToDelete.element) itemToDelete.element.classList.add('item-fade-out'); setTimeout(async () => { if (itemToDelete.type === 'card') { const batch = writeBatch(db); const cardRef = doc(db, 'users', currentUser.uid, 'cards', itemToDelete.id); batch.delete(cardRef); const associatedPurchases = purchases.filter(p => p.cardId === itemToDelete.id); associatedPurchases.forEach(p => { const purchaseRef = doc(db, 'users', currentUser.uid, 'purchases', p.id); batch.delete(purchaseRef); }); await batch.commit(); } else if(itemToDelete.type === 'purchase') { await deleteDoc(doc(db, 'users', currentUser.uid, 'purchases', itemToDelete.id)); } closeDeleteModal(); }, 300); }
+                if (element) element.classList.add('item-fade-out');
+
+                setTimeout(async () => {
+                    try {
+                        if (type === 'purchase') {
+                            await deleteDoc(doc(db, 'users', currentUser.uid, 'purchases', id));
+                            // onSnapshot will fire, but we update the local state for instant UI feedback
+                            const initialPurchaseCount = purchases.length;
+                            purchases = purchases.filter(p => p.id !== id);
+                            if (purchases.length < initialPurchaseCount) {
+                                refreshUI();
+                            }
+                        } else if (type === 'card') {
+                            const batch = writeBatch(db);
+                            const cardRef = doc(db, 'users', currentUser.uid, 'cards', id);
+                            batch.delete(cardRef);
+                            
+                            const purchasesToDelete = purchases.filter(p => p.cardId === id);
+                            purchasesToDelete.forEach(p => {
+                                const purchaseRef = doc(db, 'users', currentUser.uid, 'purchases', p.id);
+                                batch.delete(purchaseRef);
+                            });
+                            
+                            await batch.commit();
+                            // Let the onSnapshot listeners for both cards and purchases handle the UI update
+                        }
+                    } catch (error) {
+                        console.error("Silme işlemi sırasında hata:", error);
+                        showInfoModal("Öğe silinirken bir hata oluştu.", "Hata", "error");
+                        if (element) element.classList.remove('item-fade-out');
+                    } finally {
+                        closeDeleteModal();
+                    }
+                }, 300);
+            }
+            
+            async function handleDeleteAllData() { showConfirmModal('<b>Bu işlem KESİNLİKLE GERİ ALINAMAZ.</b><br><br>Tüm kart ve harcama verileriniz kalıcı olarak silinecektir. Devam etmek istediğinizden emin misiniz?', 'Tüm Verileri Sil', async () => { if(!currentUser) return; const batch = writeBatch(db); const cardsRef = collection(db, 'users', currentUser.uid, 'cards'); const purchasesRef = collection(db, 'users', currentUser.uid, 'purchases'); cards.forEach(c => batch.delete(doc(cardsRef, c.id))); purchases.forEach(p => batch.delete(doc(purchasesRef, p.id))); await batch.commit(); showInfoModal('Tüm verileriniz başarıyla silindi.', 'Başarılı', 'success'); }, 'EVET, TÜMÜNÜ SİL', 'İptal'); }
             async function handleCancelSubscription(id) { const purchase = purchases.find(p => p.id === id); if(!purchase || !currentUser) return; showConfirmModal(`"${purchase.purchaseName}" aboneliğini iptal etmek istediğinize emin misiniz? Bu işlem harcamayı silmez, sadece tekrarlama özelliğini kapatır.`, 'Abonelik İptali', async () => { await updateDoc(doc(db, 'users', currentUser.uid, 'purchases', id), { isRecurring: false }); }); }
             
             // --- BAŞLANGIÇ ---
