@@ -420,7 +420,7 @@
                 function hideInfoModal() { el.infoModal.style.display = 'none'; el.infoModalBackdrop.style.display = 'none'; confirmCallback = null; }
                 function openDeleteModal(id, type, name, element) { itemToDelete = { id, type, element }; const modalBody = el.deleteConfirmModal; modalBody.innerHTML = `<div class="flex items-center"><div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-900/50 sm:mx-0 sm:h-10 sm:w-10"><svg class="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div><h3 class="ml-4 text-lg font-medium text-white">Silme Onayı</h3></div><p class="text-sm text-slate-400 mt-4 ml-14">"${name}" öğesini silmek istediğinizden emin misiniz? ${type === 'card' ? 'Bu karta ait tüm harcamalar da silinecektir.' : ''}</p><div class="mt-5 flex justify-end gap-3"><button id="cancel-delete-btn" class="bg-slate-600 text-slate-200 py-2 px-4 rounded-md">İptal</button><button id="confirm-delete-btn" class="bg-red-600 text-white py-2 px-4 rounded-md">Evet, Sil</button></div>`; el.deleteConfirmModal.style.display = 'block'; el.deleteConfirmBackdrop.style.display = 'block'; }
                 function closeDeleteModal() { el.deleteConfirmModal.style.display = 'none'; el.deleteConfirmBackdrop.style.display = 'none'; }
-                function openEditCardModal(id) { const card = cards.find(c => c.id === id); if (!card) return; el.editCardModal.innerHTML = `<h2 class="text-xl font-bold mb-4 text-white">Kartı Düzenle</h2><form id="edit-card-form" class="space-y-4"><input type="hidden" id="edit-card-id" value="${card.id}"><label>Kart Adı</label><input type="text" id="edit-card-name" value="${card.cardName}" class="mt-1 block w-full border border-slate-600 rounded-md p-2 bg-slate-700" required><label>Kesim Günü</label><input type="number" id="edit-statement-day" value="${card.statementDay}" class="mt-1 block w-full border border-slate-600 rounded-md p-2 bg-slate-700" required><label>Limit</label><input type="number" id="edit-card-limit" value="${card.cardLimit || 0}" class="mt-1 block w-full border border-slate-600 rounded-md p-2 bg-slate-700" required><div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-edit-card-btn" class="bg-slate-600 px-4 py-2 rounded-md">İptal</button><button type="submit" class="text-white px-4 py-2 rounded-md" style="background-color: var(--primary-color);">Kaydet</button></div></form>`; el.editCardModal.style.display = 'block'; el.editCardBackdrop.style.display = 'block'; }
+                function openEditCardModal(id) { const card = cards.find(c => c.id === id); if (!card) return; el.editCardModal.innerHTML = `<h2 class="text-xl font-bold mb-4 text-white">Kartı Düzenle</h2><form id="edit-card-form" class="space-y-4"><input type="hidden" id="edit-card-id" value="${card.id}"><label>Kart Adı</label><input type="text" id="edit-card-name" value="${card.cardName}" class="mt-1 block w-full border border-slate-600 rounded-md p-2 bg-slate-700" required><label>Kesim Günü</label><input type="number" id="edit-statement-day" value="${card.statementDay}" class="mt-1 block w-full border border-slate-600 rounded-md p-2 bg-slate-700" required><label>Limit</label><input type="number" id="edit-card-limit" value="${card.cardLimit}" class="mt-1 block w-full border border-slate-600 rounded-md p-2 bg-slate-700" required><div class="mt-6 flex justify-end space-x-3"><button type="button" id="cancel-edit-card-btn" class="bg-slate-600 px-4 py-2 rounded-md">İptal</button><button type="submit" class="text-white px-4 py-2 rounded-md" style="background-color: var(--primary-color);">Kaydet</button></div></form>`; el.editCardModal.style.display = 'block'; el.editCardBackdrop.style.display = 'block'; }
                 function closeEditCardModal() { el.editCardModal.style.display = 'none'; el.editCardBackdrop.style.display = 'none'; }
                 function openEditPurchaseModal(id) {
                     const p = purchases.find(p => p.id === id);
@@ -522,19 +522,16 @@
                             }
                         });
 
-                        const cardLimit = parseFloat(card.cardLimit) || 0;
-                        const remainingLimit = cardLimit - totalUnpaidDebt;
-                        const usagePercentage = cardLimit > 0 ? (totalUnpaidDebt / cardLimit) * 100 : 0;
-                        
+                        const remainingLimit = parseFloat(card.cardLimit) - totalUnpaidDebt;
+                        const usagePercentage = card.cardLimit > 0 ? (totalUnpaidDebt / card.cardLimit) * 100 : 0;
                         const cardEl = document.createElement('div');
                         cardEl.className = 'bg-slate-700 p-4 rounded-lg border border-slate-600 transition-all duration-300';
                         cardEl.style.animation = 'fadeIn 0.5s';
-                        
                         cardEl.innerHTML = `
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="font-semibold text-lg text-white">${card.cardName}</p>
-                                    <p class="text-xs text-slate-400">Kesim: Ayın ${card.statementDay}. günü | Toplam Limit: ${formatCurrency(cardLimit)}</p>
+                                    <p class="text-xs text-slate-400">Kesim: Ayın ${card.statementDay}. günü</p>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <button data-id="${card.id}" class="edit-card-btn text-sm bg-blue-900/50 text-blue-300 font-semibold px-3 py-1 rounded-md hover:bg-blue-800/50">Düzenle</button>
@@ -542,13 +539,14 @@
                                 </div>
                             </div>
                             <div class="mt-3">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400">Kullanılan: <span class="font-medium text-white">${formatCurrency(totalUnpaidDebt)}</span></span>
+                                    <span class="text-slate-400">Limit: <span class="font-medium text-white">${formatCurrency(card.cardLimit)}</span></span>
+                                </div>
                                 <div class="w-full bg-slate-600 rounded-full h-2.5">
                                     <div class="h-2.5 rounded-full transition-all duration-500" style="width: ${Math.min(usagePercentage, 100)}%; background-color: ${usagePercentage > 90 ? '#ef4444' : usagePercentage > 70 ? '#f97316' : 'var(--primary-color)'};"></div>
                                 </div>
-                                <div class="flex justify-between text-xs mt-1">
-                                    <span class="text-slate-400">Kullanılan Bakiye: <span class="font-medium text-white">${formatCurrency(totalUnpaidDebt)}</span></span>
-                                    <span class="text-slate-400">Kullanılabilir Limit: <span class="font-medium text-green-400">${formatCurrency(remainingLimit)}</span></span>
-                                </div>
+                                <p class="text-right text-xs mt-1 text-green-400">Kalan Limit: <span class="font-bold">${formatCurrency(remainingLimit)}</span></p>
                             </div>`;
                         el.cardList.appendChild(cardEl);
                     });
@@ -969,12 +967,12 @@
                         el.purchaseDateInput.valueAsDate = new Date();
                         showInfoModal('Harcama başarıyla eklendi.', 'Başarılı', 'success');
                     } else if (form.id === 'add-card-form') {
-                        const newCard = { cardName: form.elements['card-name'].value, statementDay: parseInt(form.elements['statement-day'].value), cardLimit: parseFloat(form.elements['card-limit'].value) || 0, createdAt: serverTimestamp() };
+                        const newCard = { cardName: form.elements['card-name'].value, statementDay: parseInt(form.elements['statement-day'].value), cardLimit: parseFloat(form.elements['card-limit'].value), createdAt: serverTimestamp() };
                         await addDoc(collection(db, 'users', currentUser.uid, 'cards'), newCard);
                         form.reset();
                     } else if (form.id === 'edit-card-form') {
                         const cardId = form.elements['edit-card-id'].value;
-                        const updatedCard = { cardName: form.elements['edit-card-name'].value, statementDay: parseInt(form.elements['edit-statement-day'].value), cardLimit: parseFloat(form.elements['edit-card-limit'].value) || 0 };
+                        const updatedCard = { cardName: form.elements['edit-card-name'].value, statementDay: parseInt(form.elements['edit-statement-day'].value), cardLimit: parseFloat(form.elements['edit-card-limit'].value) };
                         await updateDoc(doc(db, 'users', currentUser.uid, 'cards', cardId), updatedCard);
                         closeEditCardModal();
                     } else if (form.id === 'edit-purchase-form') {
