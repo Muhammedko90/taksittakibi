@@ -8,20 +8,29 @@
   "theme_color": "#6d28d9",
   "icons": [
     {
-      "src": "icons/icon-192x192.png",
+      "src": "/icons/icon-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "icons/icon-512x512.png",
+      "src": "/icons/icon-512x512.png",
       "type": "image/png",
       "sizes": "512x512"
     },
     {
-      "src": "icons/icon-maskable.png",
+      "src": "/icons/icon-maskable.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Yeni Harcama Ekle",
+      "short_name": "Harcama Ekle",
+      "description": "Hızlıca yeni bir harcama kaydı oluşturun.",
+      "url": "/index.html?action=add_purchase",
+      "icons": [{ "src": "/icons/add-shortcut.png", "sizes": "192x192" }]
     }
   ]
 }
