@@ -1,17 +1,16 @@
-// GÜNCELLEME: Önbellek sürümü artırıldı ve kısayol ikonu eklendi.
-const CACHE_NAME = 'mak-taksit-cache-v18'; 
+// GÜNCELLEME: Önbellek sürümü artırıldı ve cache'lenecek URL'ler güncellendi.
+const CACHE_NAME = 'mak-taksit-cache-v17'; 
 const urlsToCache = [
   '/',
   '/index.html',
-  // Yerel ikonlar
+  // Yerel ikonlar eklendi
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
   '/icons/icon-maskable.png',
-  '/icons/add-shortcut.png', // Kısayol için yeni ikon
   // CDN'ler
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-  // Day.js ve tüm eklentileri
+  // Day.js ve tüm eklentileri eklendi
   'https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js',
   'https://cdn.jsdelivr.net/npm/dayjs@1/plugin/customParseFormat.js',
   'https://cdn.jsdelivr.net/npm/dayjs@1/plugin/isSameOrBefore.js',
@@ -26,12 +25,12 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Önbellek açıldı ve dosyalar ekleniyor.');
-        // Hataları görmezden gel, özellikle çapraz kaynaklı CDN'ler için
-        return cache.addAll(urlsToCache).catch(err => console.warn('Tüm kaynaklar önbelleğe alınamadı:', err));
+        return cache.addAll(urlsToCache);
       })
   );
 });
@@ -47,21 +46,16 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Eğer istek bir kısayol linki ise (action parametresi içeriyorsa),
-  // her zaman önbellekteki ana index.html sayfasını döndür.
-  if (url.pathname === '/index.html' || url.pathname === '/') {
-    event.respondWith(caches.match('/index.html'));
-    return;
-  }
-
-  // Diğer tüm istekler için standart "önce önbellek" stratejisini kullan.
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request);
-      })
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      }
+    )
   );
 });
 
