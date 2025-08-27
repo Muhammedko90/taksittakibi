@@ -40,6 +40,8 @@
         .item-fade-out { animation: fadeOut 0.3s ease-out forwards; }
         .hidden { display: none; }
         input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(1) brightness(0.9); cursor: pointer; }
+        .details-list { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .details-list.open { max-height: 500px; /* Yeterince büyük bir değer */ }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-slate-200 transition-colors duration-300">
@@ -394,6 +396,8 @@
         function renderSubscriptions() { if (!el.subscriptionList) return; const subscriptions = purchases.filter(p => p.isRecurring); if (subscriptions.length === 0) { el.subscriptionList.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Gösterilecek abonelik bulunmuyor.</p>'; return; } el.subscriptionList.innerHTML = ''; let monthlyTotal = 0; subscriptions.forEach(p => { const card = cards.find(c => c.id === p.cardId); const monthlyCost = parseFloat(p.totalAmount) / parseInt(p.installmentsCount); monthlyTotal += monthlyCost; const subEl = document.createElement('div'); subEl.className = 'flex justify-between items-center bg-slate-700 p-4 rounded-lg border border-slate-600'; subEl.innerHTML = ` <div> <p class="font-semibold text-white">${p.purchaseName}</p> <p class="text-sm text-slate-300">${p.category || 'Diğer'}</p> <p class="text-xs text-slate-400">Kart: ${card ? card.cardName : 'Bilinmeyen'}</p> </div> <div class="text-right flex items-center space-x-3"> <div> <p class="font-semibold text-lg text-white">${formatCurrency(monthlyCost)}</p> <p class="text-xs text-slate-400">aylık</p> </div> <div class="flex flex-col space-y-2"> <button data-id="${p.id}" class="edit-subscription-btn text-blue-400 hover:text-blue-300" title="Düzenle"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button> <button data-id="${p.id}" class="cancel-subscription-btn text-red-400 hover:text-red-300" title="Aboneliği İptal Et"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button> </div> </div>`; el.subscriptionList.appendChild(subEl); }); const summaryEl = document.createElement('div'); summaryEl.className = 'mt-6 pt-4 border-t border-slate-700 text-right'; summaryEl.innerHTML = `<p class="text-sm text-slate-300">Aylık Toplam Abonelik Gideri</p><p class="font-bold text-2xl text-white">${formatCurrency(monthlyTotal)}</p>`; el.subscriptionList.appendChild(summaryEl); }
         function renderDebts() { if (!el.debtList) return; const paidMonths = userSettings?.paidMonths || {}; const unpaidDebts = debts.filter(debt => { const paymentKey = `${debt.paymentMonth}_${debt.cardId}`; return !paidMonths[paymentKey]; }); if (unpaidDebts.length === 0) { el.debtList.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Ödenmemiş manuel borç bulunmuyor.</p>'; return; } el.debtList.innerHTML = ''; unpaidDebts.forEach(d => { const card = cards.find(c => c.id === d.cardId); const debtEl = document.createElement('div'); debtEl.className = 'flex justify-between items-center bg-slate-700 p-4 rounded-lg border border-slate-600'; debtEl.innerHTML = ` <div> <p class="font-semibold text-white">${d.debtName}</p> <p class="text-sm" style="color:var(--primary-text-color);">${dayjs(d.paymentMonth).format('MMMM YYYY')} ayında ödenecek</p> <p class="text-xs text-slate-400">Kart: ${card ? card.cardName : 'Bilinmeyen'}</p> </div> <div class="text-right"> <p class="font-semibold text-lg text-white">${formatCurrency(d.amount)}</p> <button data-id="${d.id}" class="delete-debt-btn text-xs text-red-400 hover:text-red-300 mt-1">[Sil]</button> </div> `; el.debtList.appendChild(debtEl); }); }
         function renderCategoryList() { if (!el.categoryList) return; el.categoryList.innerHTML = ''; const protectedCategories = ['Manuel Borç', 'Diğer']; categories.sort((a,b) => a.name.localeCompare(b.name, 'tr')).forEach(cat => { const catEl = document.createElement('div'); catEl.className = 'flex justify-between items-center bg-slate-700 p-3 rounded-md'; catEl.innerHTML = `<span class="text-white">${cat.name}</span>`; if (!protectedCategories.includes(cat.name)) { catEl.innerHTML += ` <div class="flex items-center space-x-2"> <button data-id="${cat.id}" data-name="${cat.name}" class="delete-category-btn text-sm bg-red-900/50 text-red-300 font-semibold px-3 py-1 rounded-md hover:bg-red-800/50">Sil</button> </div>`; } el.categoryList.appendChild(catEl); }); }
+        
+        // YENİ: Hesaplama fonksiyonu taksit detaylarını içerecek şekilde güncellendi
         function calculatePaymentSchedule() {
             const schedule = {};
             const paidMonths = userSettings?.paidMonths || {};
@@ -417,10 +421,17 @@
                     const paymentMonthKey = dueDate.format('YYYY-MM');
 
                     if (!schedule[paymentMonthKey]) schedule[paymentMonthKey] = { total: 0, unpaidTotal: 0, details: {} };
-                    if (!schedule[paymentMonthKey].details[p.cardId]) schedule[paymentMonthKey].details[p.cardId] = { amount: 0, dueDate: dueDate.format('YYYY-MM-DD') };
+                    if (!schedule[paymentMonthKey].details[p.cardId]) {
+                        schedule[paymentMonthKey].details[p.cardId] = { amount: 0, dueDate: dueDate.format('YYYY-MM-DD'), installments: [] };
+                    }
 
                     schedule[paymentMonthKey].details[p.cardId].amount += installmentAmount;
-                    schedule[paymentMonthKey].total += installmentAmount;
+                    schedule[paymentMonthKey].details[p.cardId].installments.push({
+                        name: p.purchaseName,
+                        current: i + 1,
+                        total: p.installmentsCount,
+                        amount: installmentAmount
+                    });
 
                     const paymentKey = `${paymentMonthKey}_${p.cardId}`;
                     if (!paidMonths[paymentKey]) {
@@ -440,10 +451,17 @@
                 const dueDate = dayjs(paymentMonthKey).date(statementDay).add(paymentOffset, 'days');
 
                 if (!schedule[paymentMonthKey]) schedule[paymentMonthKey] = { total: 0, unpaidTotal: 0, details: {} };
-                if (!schedule[paymentMonthKey].details[debt.cardId]) schedule[paymentMonthKey].details[debt.cardId] = { amount: 0, dueDate: dueDate.format('YYYY-MM-DD') };
+                if (!schedule[paymentMonthKey].details[debt.cardId]) {
+                    schedule[paymentMonthKey].details[debt.cardId] = { amount: 0, dueDate: dueDate.format('YYYY-MM-DD'), installments: [] };
+                }
 
                 schedule[paymentMonthKey].details[debt.cardId].amount += debtAmount;
-                schedule[paymentMonthKey].total += debtAmount;
+                schedule[paymentMonthKey].details[debt.cardId].installments.push({
+                    name: debt.debtName,
+                    current: 1,
+                    total: 1,
+                    amount: debtAmount
+                });
 
                 const paymentKey = `${paymentMonthKey}_${debt.cardId}`;
                 if (!paidMonths[paymentKey]) {
@@ -453,7 +471,80 @@
 
             return schedule;
         }
-        function renderPaymentPlan(schedule, selectedMonthKey) { if (!el.paymentPlan) return; const monthsToRender = selectedMonthKey === 'all' ? Object.keys(schedule).filter(m => schedule[m].unpaidTotal > 0).sort() : (schedule[selectedMonthKey] ? [selectedMonthKey] : []); let content = ''; let hasAnyPayment = false; monthsToRender.forEach((monthKey, index) => { const monthData = schedule[monthKey]; if (!monthData) return; let monthCardsContent = ''; let unpaidTotalForMonth = 0; cards.forEach(card => { const paymentData = monthData.details[card.id]; if (paymentData && paymentData.amount > 0) { const paymentKey = `${monthKey}_${card.id}`; const isPaid = userSettings?.paidMonths?.[paymentKey]; if (isPaid) return; hasAnyPayment = true; unpaidTotalForMonth += paymentData.amount; const dueDate = dayjs(paymentData.dueDate); const lateClass = dayjs().isAfter(dueDate, 'day') ? 'border-red-500/50' : 'border-slate-600'; monthCardsContent += ` <div class="bg-slate-900/50 p-4 rounded-lg border ${lateClass}"> <div class="flex justify-between items-center"> <div> <p class="font-bold text-white">${card.cardName}</p> <p class="text-xs text-slate-400">Son Ödeme: ${dueDate.format('DD MMMM YYYY')}</p> </div> <p class="text-xl font-semibold text-white">${formatCurrency(paymentData.amount)}</p> </div> <div class="mt-3 text-right"> <button data-key="${paymentKey}" class="pay-btn text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">Ödendi Olarak İşaretle</button> </div> </div>`; } }); if (monthCardsContent) { if (selectedMonthKey === 'all') { content += ` <div class="${index > 0 ? 'mt-8' : ''}"> <h3 class="text-lg font-semibold text-white border-b border-slate-600 pb-2 mb-4">${dayjs(monthKey).format('MMMM YYYY')}</h3> <div class="space-y-4">${monthCardsContent}</div> </div>`; } else { content += ` <div class="space-y-4">${monthCardsContent}</div> <div class="mt-6 pt-4 border-t border-slate-700 text-right"> <p class="text-sm text-slate-300">${dayjs(monthKey).format('MMMM YYYY')} Kalan Toplam Ödeme</p> <p class="font-bold text-2xl text-red-500">${formatCurrency(unpaidTotalForMonth)}</p> </div>`; } } }); if (!hasAnyPayment) { el.paymentPlan.innerHTML = `<p class="text-center text-slate-400 py-8">Görüntülenecek ödeme bulunmuyor.</p>`; } else { el.paymentPlan.innerHTML = content; } }
+
+        // YENİ: Ödeme planı render fonksiyonu açılır/kapanır detayları gösterecek şekilde güncellendi
+        function renderPaymentPlan(schedule, selectedMonthKey) {
+            if (!el.paymentPlan) return;
+            const monthsToRender = selectedMonthKey === 'all' ? Object.keys(schedule).filter(m => schedule[m].unpaidTotal > 0).sort() : (schedule[selectedMonthKey] ? [selectedMonthKey] : []);
+            let content = '';
+            let hasAnyPayment = false;
+
+            monthsToRender.forEach((monthKey, index) => {
+                const monthData = schedule[monthKey];
+                if (!monthData) return;
+                let monthCardsContent = '';
+                let unpaidTotalForMonth = 0;
+
+                cards.forEach(card => {
+                    const paymentData = monthData.details[card.id];
+                    if (paymentData && paymentData.amount > 0) {
+                        const paymentKey = `${monthKey}_${card.id}`;
+                        const isPaid = userSettings?.paidMonths?.[paymentKey];
+                        if (isPaid) return;
+
+                        hasAnyPayment = true;
+                        unpaidTotalForMonth += paymentData.amount;
+                        const dueDate = dayjs(paymentData.dueDate);
+                        const lateClass = dayjs().isAfter(dueDate, 'day') ? 'border-red-500/50' : 'border-slate-600';
+                        const detailsId = `details-${monthKey}-${card.id}`;
+
+                        let detailsHtml = paymentData.installments.map(inst => `
+                            <div class="flex justify-between items-center text-sm text-slate-300">
+                                <span>${inst.name} (${inst.current}/${inst.total})</span>
+                                <span class="font-medium text-white">${formatCurrency(inst.amount)}</span>
+                            </div>
+                        `).join('');
+
+                        monthCardsContent += `
+                        <div class="bg-slate-900/50 rounded-lg border ${lateClass} overflow-hidden">
+                            <div class="p-4 flex justify-between items-center cursor-pointer card-statement-toggle" data-target-id="${detailsId}">
+                                <div>
+                                    <p class="font-bold text-white">${card.cardName}</p>
+                                    <p class="text-xs text-slate-400">Son Ödeme: ${dueDate.format('DD MMMM YYYY')}</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <p class="text-xl font-semibold text-white mr-3">${formatCurrency(paymentData.amount)}</p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div id="${detailsId}" class="details-list bg-black/20">
+                                <div class="p-4 pt-2 space-y-2">${detailsHtml}</div>
+                            </div>
+                            <div class="p-4 border-t border-slate-800 text-right">
+                                <button data-key="${paymentKey}" class="pay-btn text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">Ödendi Olarak İşaretle</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+
+                if (monthCardsContent) {
+                    if (selectedMonthKey === 'all') {
+                        content += `<div class="${index > 0 ? 'mt-8' : ''}"><h3 class="text-lg font-semibold text-white border-b border-slate-600 pb-2 mb-4">${dayjs(monthKey).format('MMMM YYYY')}</h3><div class="space-y-4">${monthCardsContent}</div></div>`;
+                    } else {
+                        content += `<div class="space-y-4">${monthCardsContent}</div><div class="mt-6 pt-4 border-t border-slate-700 text-right"><p class="text-sm text-slate-300">${dayjs(monthKey).format('MMMM YYYY')} Kalan Toplam Ödeme</p><p class="font-bold text-2xl text-red-500">${formatCurrency(unpaidTotalForMonth)}</p></div>`;
+                    }
+                }
+            });
+
+            if (!hasAnyPayment) {
+                el.paymentPlan.innerHTML = `<p class="text-center text-slate-400 py-8">Görüntülenecek ödeme bulunmuyor.</p>`;
+            } else {
+                el.paymentPlan.innerHTML = content;
+            }
+        }
+
         function renderHistory(schedule) { if (!el.historyList || !el.historyPagination) return; const paidMonths = userSettings?.paidMonths || {}; const allPaidItems = Object.keys(paidMonths).map(paymentKey => { const paidInfo = paidMonths[paymentKey]; if (typeof paidInfo !== 'object' || !paidInfo.paidDate) return null; const [monthKey, cardId] = paymentKey.split('_'); const card = cards.find(c => c.id === cardId); const amount = schedule[monthKey]?.details[cardId]?.amount || 0; if (!card || amount <= 0) return null; return { cardName: card.cardName, amount: amount, key: paymentKey, paidDate: paidInfo.paidDate, month: monthKey }; }).filter(item => item !== null).sort((a, b) => dayjs(b.paidDate).valueOf() - dayjs(a.paidDate).valueOf()); if (allPaidItems.length === 0) { el.historyList.innerHTML = '<p class="text-center text-slate-400 py-8">Henüz ödenmiş harcama yok.</p>'; el.historyPagination.innerHTML = ''; return; } const totalPages = Math.ceil(allPaidItems.length / HISTORY_ITEMS_PER_PAGE); historyCurrentPage = Math.max(1, Math.min(historyCurrentPage, totalPages)); const startIndex = (historyCurrentPage - 1) * HISTORY_ITEMS_PER_PAGE; const pageItems = allPaidItems.slice(startIndex, startIndex + HISTORY_ITEMS_PER_PAGE); let content = '<div class="space-y-4">'; pageItems.forEach(item => { content += ` <div class="bg-slate-700/50 p-4 rounded-lg"> <div class="flex justify-between items-start"> <div> <p class="font-semibold text-white">${item.cardName}</p> <p class="text-sm" style="color:var(--primary-text-color);">${dayjs(item.month).format('MMMM YYYY')} Ekstresi</p> </div> <span class="font-semibold text-xl text-green-400">${formatCurrency(item.amount)}</span> </div> <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-600/50"> <p class="text-xs text-slate-400">Ödendi: ${dayjs(item.paidDate).format('DD MMMM YYYY, dddd')}</p> <button data-key="${item.key}" class="undo-pay-btn text-xs text-slate-500 hover:text-white">[Geri Al]</button> </div> </div>`; }); content += '</div>'; el.historyList.innerHTML = content; let paginationContent = ''; if (totalPages > 1) paginationContent = ` <button id="history-prev-btn" class="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed" ${historyCurrentPage === 1 ? 'disabled' : ''}>Geri</button> <span class="text-sm text-slate-400">Sayfa ${historyCurrentPage} / ${totalPages}</span> <button id="history-next-btn" class="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed" ${historyCurrentPage === totalPages ? 'disabled' : ''}>İleri</button> `; el.historyPagination.innerHTML = paginationContent; }
         function renderCategoryChart() { if (!el.categoryChartCanvas) return; const ctx = el.categoryChartCanvas.getContext('2d'); if (categoryChartInstance) categoryChartInstance.destroy(); if(userSettings.privacyMode) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.font = "16px Inter"; ctx.fillStyle = '#94a3b8'; ctx.textAlign = "center"; ctx.fillText("Veriler Gizlilik Modu'nda gizlenmiştir.", ctx.canvas.width / 2, ctx.canvas.height / 2); return; } const allItems = [...purchases, ...debts.map(d => ({...d, totalAmount: d.amount, category: 'Manuel Borç'}))]; const categoryTotals = allItems.reduce((acc, p) => { const categoryName = p.category || 'Diğer'; acc[categoryName] = (acc[categoryName] || 0) + parseFloat(p.totalAmount || p.amount); return acc; }, {}); const labels = Object.keys(categoryTotals); const data = Object.values(categoryTotals); if (labels.length === 0) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); ctx.font = "16px Inter"; ctx.fillStyle = '#94a3b8'; ctx.textAlign = "center"; ctx.fillText("Gösterilecek harcama verisi yok.", ctx.canvas.width / 2, ctx.canvas.height / 2); return; } categoryChartInstance = new Chart(ctx, { type: 'pie', data: { labels, datasets: [{ label: 'Harcama Dağılımı', data, backgroundColor: ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899', '#64748b'], borderColor: '#1f2937', borderWidth: 2 }] }, options: { responsive: true, plugins: { legend: { position: 'top', labels: { color: '#e2e8f0' } } } } }); }
         function renderSummary(schedule) { if (!el.summaryPanel) return; let thisMonthPayment = 0; let totalDebt = 0; let nextDueDateInfo = null; let nextStatementDateInfo = null; const today = dayjs(); const paidMonths = userSettings?.paidMonths || {}; Object.entries(schedule).forEach(([monthKey, monthData]) => { Object.entries(monthData.details).forEach(([cardId, cardData]) => { const paymentKey = `${monthKey}_${cardId}`; if (!paidMonths[paymentKey]) { const amount = cardData.amount; const dueDate = dayjs(cardData.dueDate); totalDebt += amount; if (dueDate.format('YYYY-MM') === today.format('YYYY-MM')) thisMonthPayment += amount; if (dueDate.isAfter(today) && (!nextDueDateInfo || dueDate.isBefore(nextDueDateInfo.date))) { const card = cards.find(c => c.id === cardId); nextDueDateInfo = { date: dueDate, cardName: card?.cardName || 'Bilinmeyen Kart' }; } } }); }); cards.forEach(card => { const statementDay = parseInt(card.statementDay); if (isNaN(statementDay)) return; let nextStatementDate = today.date(statementDay); if (today.isSameOrAfter(nextStatementDate, 'day')) nextStatementDate = nextStatementDate.add(1, 'month'); if (!nextStatementDateInfo || nextStatementDate.isBefore(nextStatementDateInfo.date)) nextStatementDateInfo = { date: nextStatementDate, cardName: card.cardName }; }); el.summaryPanel.innerHTML = `<h2 class="text-xl font-bold mb-4">Durum Özeti</h2><div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center"><div><p class="text-sm opacity-80">Bu Ay Kalan Ödeme</p><p class="text-2xl font-bold">${formatCurrency(thisMonthPayment)}</p></div><div><p class="text-sm opacity-80">En Yakın Son Ödeme</p><p class="text-2xl font-bold">${nextDueDateInfo ? nextDueDateInfo.date.format('DD.MM.YYYY') : '-'}</p><p class="text-xs opacity-80">${nextDueDateInfo ? nextDueDateInfo.cardName : ''}</p></div><div><p class="text-sm opacity-80">En Yakın Kesim Tarihi</p><p class="text-2xl font-bold">${nextStatementDateInfo ? nextStatementDateInfo.date.format('DD.MM.YYYY') : '-'}</p><p class="text-xs opacity-80">${nextStatementDateInfo ? nextStatementDateInfo.cardName : ''}</p></div><div><p class="text-sm opacity-80">Toplam Kalan Borç</p><p class="text-2xl font-bold">${formatCurrency(totalDebt)}</p></div></div>`; }
@@ -523,6 +614,21 @@
         function bindEventListeners() { document.body.addEventListener('submit', handleFormSubmits); document.body.addEventListener('input', e => { if (e.target.id === 'search-input') renderPurchasesList(); if (e.target.id === 'custom-theme-picker') updateSettings({ theme: 'custom', customThemeColor: e.target.value }); }); document.body.addEventListener('change', e => { if (e.target.id === 'filter-category') renderPurchasesList(); if (e.target.id === 'privacy-mode-toggle') updateSettings({ privacyMode: e.target.checked }); if (e.target.id === 'plan-month-selector') { selectedPlanMonth = e.target.value; renderPaymentPlan(calculatePaymentSchedule(), selectedPlanMonth); } }); document.body.addEventListener('click', handleBodyClicks); }
         function handleBodyClicks(e) {
             const btn = e.target.closest('button');
+            const toggleBtn = e.target.closest('.card-statement-toggle');
+
+            if (toggleBtn) {
+                const targetId = toggleBtn.dataset.targetId;
+                const detailsEl = document.getElementById(targetId);
+                const icon = toggleBtn.querySelector('svg');
+                if (detailsEl) {
+                    detailsEl.classList.toggle('open');
+                }
+                if (icon) {
+                    icon.classList.toggle('rotate-180');
+                }
+                return;
+            }
+
             if (!btn) return;
             const id = btn.dataset.id, key = btn.dataset.key;
             
@@ -613,4 +719,3 @@
     </script>
 </body>
 </html>
-
