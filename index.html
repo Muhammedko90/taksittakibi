@@ -137,14 +137,14 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             border: 1px solid var(--border-color);
             opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s, transform 0.3s;
+            transition: opacity 0.3s;
             pointer-events: none;
+            visibility: hidden;
         }
-         #tour-tooltip.active {
+        #tour-tooltip.active {
             opacity: 1;
-            transform: translateY(0);
             pointer-events: all;
+            visibility: visible;
         }
 
     </style>
@@ -987,7 +987,6 @@
                 highlighted.classList.remove('tour-highlight');
             }
 
-            // Gerekirse sekmeyi değiştir
             if (step.element && (step.element === '#add-card-form' || step.element === '[data-panel="settings"]')) {
                  document.querySelector('[data-panel="home"]').classList.remove('tab-active');
                  document.querySelector('[data-panel="settings"]').classList.add('tab-active');
@@ -1014,43 +1013,57 @@
                     </div>
                 </div>
             `;
-
+            
+            el.tourTooltip.style.visibility = 'hidden';
             el.tourTooltip.classList.add('active');
             
-            if (targetElement) {
-                targetElement.classList.add('tour-highlight');
-                const rect = targetElement.getBoundingClientRect();
-                
-                // Tooltip'i konumlandır
-                const top = rect.bottom + 15;
-                const left = rect.left + (rect.width / 2) - (el.tourTooltip.offsetWidth / 2);
+            // Timeout to allow the browser to calculate the new dimensions after content change
+            setTimeout(() => {
+                if (targetElement) {
+                    targetElement.classList.add('tour-highlight');
+                    const rect = targetElement.getBoundingClientRect();
+                    const tooltipRect = el.tourTooltip.getBoundingClientRect();
 
-                el.tourTooltip.style.top = `${top}px`;
-                el.tourTooltip.style.left = `${Math.max(10, Math.min(left, window.innerWidth - el.tourTooltip.offsetWidth - 10))}px`;
+                    let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+                    left = Math.max(10, Math.min(left, window.innerWidth - tooltipRect.width - 10));
 
-            } else {
-                 el.tourTooltip.style.top = '50%';
-                 el.tourTooltip.style.left = '50%';
-                 el.tourTooltip.style.transform = 'translate(-50%, -50%)';
-            }
+                    let top;
+                    if (rect.bottom + tooltipRect.height + 15 < window.innerHeight) {
+                        top = rect.bottom + 15;
+                    } else {
+                        top = rect.top - tooltipRect.height - 15;
+                    }
 
-            document.getElementById('tour-skip').addEventListener('click', endTour);
-            document.getElementById('tour-next').addEventListener('click', () => {
-                if (currentTourStep < tourSteps.length - 1) {
-                    currentTourStep++;
-                    showTourStep(currentTourStep);
+                    el.tourTooltip.style.top = `${top}px`;
+                    el.tourTooltip.style.left = `${left}px`;
+                    el.tourTooltip.style.transform = 'translate(0, 0)';
+
                 } else {
-                    endTour();
+                     el.tourTooltip.style.top = '50%';
+                     el.tourTooltip.style.left = '50%';
+                     el.tourTooltip.style.transform = 'translate(-50%, -50%)';
                 }
-            });
-            if (document.getElementById('tour-prev')) {
-                document.getElementById('tour-prev').addEventListener('click', () => {
-                    if (currentTourStep > 0) {
-                        currentTourStep--;
+                
+                el.tourTooltip.style.visibility = 'visible';
+
+                document.getElementById('tour-skip').addEventListener('click', endTour);
+                document.getElementById('tour-next').addEventListener('click', () => {
+                    if (currentTourStep < tourSteps.length - 1) {
+                        currentTourStep++;
                         showTourStep(currentTourStep);
+                    } else {
+                        endTour();
                     }
                 });
-            }
+                if (document.getElementById('tour-prev')) {
+                    document.getElementById('tour-prev').addEventListener('click', () => {
+                        if (currentTourStep > 0) {
+                            currentTourStep--;
+                            showTourStep(currentTourStep);
+                        }
+                    });
+                }
+            }, 50);
         }
 
 
