@@ -100,6 +100,53 @@
         .theme-btn.active { box-shadow: 0 0 0 3px var(--accent-color); }
         .plan-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; padding-top: 0; padding-bottom: 0; }
         .plan-details.open { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; }
+
+        /* Tanıtım Turu Stilleri */
+        #tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        #tour-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .tour-highlight {
+            position: relative;
+            z-index: 9999;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            transition: box-shadow 0.3s ease;
+        }
+        #tour-tooltip {
+            position: absolute;
+            z-index: 10000;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            width: 300px;
+            max-width: 90vw;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+         #tour-tooltip.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
     </style>
 </head>
 <body class="bg-secondary text-primary">
@@ -303,6 +350,8 @@
         </nav>
     </footer>
 
+    <div id="tour-overlay"></div>
+    <div id="tour-tooltip"></div>
 
     <div id="delete-confirm-modal-backdrop" class="modal-backdrop"></div>
     <div id="delete-confirm-modal" class="modal bg-primary p-6 rounded-lg shadow-xl max-w-sm w-full"></div>
@@ -369,7 +418,9 @@
             privacyModeToggle: document.getElementById('privacy-mode-toggle'),
             themeSelector: document.getElementById('theme-selector'),
             restoreInput: document.getElementById('restore-input'),
-            notificationsBtn: document.getElementById('notifications-btn')
+            notificationsBtn: document.getElementById('notifications-btn'),
+            tourOverlay: document.getElementById('tour-overlay'),
+            tourTooltip: document.getElementById('tour-tooltip')
         };
 
         // --- LOCAL STORAGE İŞLEMLERİ ---
@@ -379,7 +430,8 @@
             DEBTS: 'mak_taksit_debts',
             CATEGORIES: 'mak_taksit_categories',
             SETTINGS: 'mak_taksit_settings',
-            NOTIFICATIONS_SHOWN: 'mak_taksit_notifications_shown'
+            NOTIFICATIONS_SHOWN: 'mak_taksit_notifications_shown',
+            TOUR_COMPLETED: 'mak_taksit_tour_completed'
         };
 
         function saveData() {
@@ -877,6 +929,130 @@
             localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS_SHOWN, JSON.stringify(notificationsShown));
         }
 
+        // --- TANITIM TURU FONKSİYONLARI ---
+        let currentTourStep = 0;
+        const tourSteps = [
+            {
+                title: 'Hoş Geldiniz!',
+                intro: 'MAK Taksit Asistanı\'na hoş geldiniz. Bu kısa tur ile uygulamanın temel özelliklerini hızlıca öğrenelim.'
+            },
+            {
+                element: '#summary-panel',
+                title: 'Özet Paneli',
+                intro: 'Bu alanda aylık ödemeleriniz, toplam borcunuz ve yaklaşan ödeme tarihleriniz gibi önemli bilgileri bir bakışta görebilirsiniz.'
+            },
+            {
+                element: '[data-panel="settings"]',
+                title: 'Ayarlar Menüsü',
+                intro: 'Uygulamayı kullanmaya başlamadan önce, Ayarlar menüsünden en az bir kredi kartı eklemeniz gerekmektedir. Hadi oraya gidelim.'
+            },
+            {
+                element: '#add-card-form',
+                title: 'Kart Ekleme',
+                intro: 'Bu formdan kartınızın adını, limitini ve ekstre kesim günü gibi bilgilerini girerek kaydedebilirsiniz.'
+            },
+            {
+                element: '[data-panel="purchases"]',
+                title: 'Harcama Ekleme',
+                intro: 'Kartınızı ekledikten sonra, bu sekmeden yaptığınız taksitli veya tek çekim harcamaları kolayca ekleyebilirsiniz.'
+            },
+            {
+                element: '#bottom-nav',
+                title: 'Navigasyon',
+                intro: 'Uygulamanın tüm bölümlerine bu alt menüden hızlıca ulaşabilirsiniz. Artık hazırsınız!'
+            }
+        ];
+
+        function startTour() {
+            el.tourOverlay.classList.add('active');
+            currentTourStep = 0;
+            showTourStep(currentTourStep);
+        }
+
+        function endTour() {
+            el.tourOverlay.classList.remove('active');
+            el.tourTooltip.classList.remove('active');
+            const highlighted = document.querySelector('.tour-highlight');
+            if (highlighted) {
+                highlighted.classList.remove('tour-highlight');
+            }
+            localStorage.setItem(STORAGE_KEYS.TOUR_COMPLETED, 'true');
+        }
+
+        function showTourStep(stepIndex) {
+            const step = tourSteps[stepIndex];
+            
+            const highlighted = document.querySelector('.tour-highlight');
+            if (highlighted) {
+                highlighted.classList.remove('tour-highlight');
+            }
+
+            // Gerekirse sekmeyi değiştir
+            if (step.element && (step.element === '#add-card-form' || step.element === '[data-panel="settings"]')) {
+                 document.querySelector('[data-panel="home"]').classList.remove('tab-active');
+                 document.querySelector('[data-panel="settings"]').classList.add('tab-active');
+                 document.querySelector('#panel-home').classList.remove('active');
+                 document.querySelector('#panel-settings').classList.add('active');
+            } else if (step.element && step.element === '[data-panel="purchases"]') {
+                 document.querySelector('[data-panel="settings"]').classList.remove('tab-active');
+                 document.querySelector('[data-panel="purchases"]').classList.add('tab-active');
+                 document.querySelector('#panel-settings').classList.remove('active');
+                 document.querySelector('#panel-purchases').classList.add('active');
+            }
+
+
+            let targetElement = step.element ? document.querySelector(step.element) : null;
+            
+            el.tourTooltip.innerHTML = `
+                <h3 class="font-bold text-lg mb-2 accent-text">${step.title}</h3>
+                <p class="text-sm text-secondary">${step.intro}</p>
+                <div class="flex justify-between items-center mt-6">
+                    <button id="tour-skip" class="text-xs text-secondary hover:text-primary">Turu Atla</button>
+                    <div>
+                        <button id="tour-prev" class="px-3 py-1 text-sm bg-tertiary rounded-md ${stepIndex === 0 ? 'hidden' : ''}">Geri</button>
+                        <button id="tour-next" class="px-4 py-2 text-sm text-white rounded-md accent-bg accent-bg-hover">${stepIndex === tourSteps.length - 1 ? 'Bitir' : 'İleri'}</button>
+                    </div>
+                </div>
+            `;
+
+            el.tourTooltip.classList.add('active');
+            
+            if (targetElement) {
+                targetElement.classList.add('tour-highlight');
+                const rect = targetElement.getBoundingClientRect();
+                
+                // Tooltip'i konumlandır
+                const top = rect.bottom + 15;
+                const left = rect.left + (rect.width / 2) - (el.tourTooltip.offsetWidth / 2);
+
+                el.tourTooltip.style.top = `${top}px`;
+                el.tourTooltip.style.left = `${Math.max(10, Math.min(left, window.innerWidth - el.tourTooltip.offsetWidth - 10))}px`;
+
+            } else {
+                 el.tourTooltip.style.top = '50%';
+                 el.tourTooltip.style.left = '50%';
+                 el.tourTooltip.style.transform = 'translate(-50%, -50%)';
+            }
+
+            document.getElementById('tour-skip').addEventListener('click', endTour);
+            document.getElementById('tour-next').addEventListener('click', () => {
+                if (currentTourStep < tourSteps.length - 1) {
+                    currentTourStep++;
+                    showTourStep(currentTourStep);
+                } else {
+                    endTour();
+                }
+            });
+            if (document.getElementById('tour-prev')) {
+                document.getElementById('tour-prev').addEventListener('click', () => {
+                    if (currentTourStep > 0) {
+                        currentTourStep--;
+                        showTourStep(currentTourStep);
+                    }
+                });
+            }
+        }
+
 
         // --- OLAY İŞLEYİCİLER (EVENT HANDLERS) ---
         function handleFormSubmits(e) { 
@@ -1128,6 +1304,12 @@
             bindEventListeners();
             el.purchaseDateInput.valueAsDate = new Date();
             el.debtPaymentMonthInput.value = dayjs().format('YYYY-MM');
+
+            // Turu başlatma kontrolü
+            const tourCompleted = localStorage.getItem(STORAGE_KEYS.TOUR_COMPLETED);
+            if (!tourCompleted && cards.length === 0 && purchases.length === 0) {
+                setTimeout(startTour, 500); // Uygulamanın yüklenmesi için kısa bir bekleme
+            }
         }
 
         init();
